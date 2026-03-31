@@ -1,0 +1,12 @@
+cookie:
+  expiry_days: 7
+  key: ccc_secret_key_change_me
+  name: ccc_auth
+credentials:
+  usernames:
+    admin:
+      name: Administrador
+      password: $2b$12$66n2oqtIDtTteop5oDTPWeqd6Oi5o95wdeHhj38EpMMwsRNXayMSK
+    ceo:
+      name: CEO
+      password: $2b$12$ZvxQ6TamNp20M/HX0Fzd0ekjRhfSOq.PoymBSnm8g34BUNKzPYatG
