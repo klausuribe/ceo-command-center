@@ -13,6 +13,14 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Auto-initialize database on first run (needed for Streamlit Cloud)
+from config.settings import DB_PATH
+if not Path(DB_PATH).exists():
+    from scripts.init_db import init_db
+    from scripts.generate_demo_data import main as generate_demo
+    init_db()
+    generate_demo()
+
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
 from app.components.kpi_cards import kpi_row, format_currency, format_pct
