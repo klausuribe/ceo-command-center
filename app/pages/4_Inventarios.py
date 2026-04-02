@@ -71,8 +71,7 @@ try:
     col3, col4 = st.columns(2)
     with col3:
         st.subheader("⚠️ Bajo Punto de Reorden")
-        data_table(crits["below_reorder"],
-                   currency_cols=["qty_available", "reorder_point"])
+        data_table(crits["below_reorder"])
 
     with col4:
         st.subheader("🗑️ Dead Stock")

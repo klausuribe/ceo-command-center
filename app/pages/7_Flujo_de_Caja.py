@@ -23,6 +23,7 @@ from ai.prompts.cashflow_prompts import CASHFLOW_ANALYSIS
 
 filters = render_sidebar()
 period = filters["period"]
+date_prefix = filters["date_prefix"]
 
 st.title("🏦 Flujo de Caja")
 
@@ -60,13 +61,13 @@ try:
     # Waterfall + By category
     col3, col4 = st.columns(2)
     with col3:
-        wf = ca.waterfall_monthly(period)
+        wf = ca.waterfall_monthly(date_prefix)
         if not wf.empty:
             waterfall_chart(wf, x="item", y="amount",
-                            title=f"Waterfall — {period}")
+                            title=f"Waterfall — {date_prefix}")
 
     with col4:
-        by_cat = ca.by_category(period)
+        by_cat = ca.by_category(date_prefix)
         if not by_cat.empty:
             data_table(by_cat, title="Detalle por Categoría",
                        currency_cols=["inflow", "outflow", "net_flow"])

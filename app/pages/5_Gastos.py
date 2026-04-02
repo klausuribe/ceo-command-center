@@ -23,11 +23,12 @@ from ai.prompts.expenses_prompts import EXPENSE_ANALYSIS
 
 filters = render_sidebar()
 period = filters["period"]
+date_prefix = filters["date_prefix"]
 
 st.title("💸 Gastos")
 
 try:
-    kpis = expense_kpis(period)
+    kpis = expense_kpis(date_prefix)
 
     kpi_row([
         {"label": "Gastos del Mes", "value": format_currency(kpis["total_expenses"])},
@@ -59,14 +60,14 @@ try:
     # By cost center + Fixed vs variable
     col3, col4 = st.columns(2)
     with col3:
-        cc = ea.by_cost_center(period)
+        cc = ea.by_cost_center(date_prefix)
         if not cc.empty:
             st.subheader("Centro de Costo — Semáforo")
             data_table(cc, currency_cols=["actual", "budget", "variance"],
                        pct_cols=["variance_pct"])
 
     with col4:
-        fv = ea.fixed_vs_variable(period)
+        fv = ea.fixed_vs_variable(date_prefix)
         if not fv.empty:
             pie_chart(fv, values="actual", names="category",
                       title="Fijos vs Variables vs Semi-variables")
@@ -75,13 +76,13 @@ try:
 
     # By account detail
     st.subheader("📋 Detalle por Cuenta")
-    by_acc = ea.by_account(period)
+    by_acc = ea.by_account(date_prefix)
     if not by_acc.empty:
         data_table(by_acc, currency_cols=["actual", "budget", "variance"],
                    pct_cols=["variance_pct"])
 
     # Anomalies
-    anomalies = ea.anomalies(period)
+    anomalies = ea.anomalies(date_prefix)
     if not anomalies.empty:
         st.subheader("⚠️ Gastos Inusuales")
         data_table(anomalies[["account", "amount", "hist_mean", "z_score"]],
@@ -105,7 +106,7 @@ try:
                 "anomalies": anomalies.to_dict("records") if not anomalies.empty else [],
             }
             return engine.analyze_module("expenses", data,
-                EXPENSE_ANALYSIS.replace("{period}", period))
+                EXPENSE_ANALYSIS.replace("{period}", date_prefix))
         ai_analysis_box("Análisis de Gastos", run_analysis)
     else:
         ai_analysis_box("Análisis de Gastos", None)

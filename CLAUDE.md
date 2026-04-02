@@ -27,11 +27,12 @@ python -c "from ai.engine import get_engine; e = get_engine(); print(e.is_availa
 
 ## Stack
 
-- **Frontend:** Streamlit 1.55+ (multi-page, dark theme, `use_container_width=True` on all charts)
+- **Frontend:** Streamlit 1.38+ (multi-page, dark theme via `.streamlit/config.toml`, port 8501)
 - **Database:** SQLite star schema (7 dim + 7 fact + 6 support = 20 tables)
 - **AI:** Claude API via `anthropic` SDK, model `claude-sonnet-4-20250514`
-- **Charts:** Plotly (wrapped in `app/components/charts.py`)
-- **Auth:** streamlit-authenticator, credentials in `config/auth_config.yaml`
+- **Charts:** Plotly (wrapped in `app/components/charts.py`, `use_container_width=True` on all charts, color palette: Set2 qualitative, positive=#2ecc71, negative=#e74c3c, warning=#f39c12)
+- **Auth:** streamlit-authenticator, credentials in `config/auth_config.yaml` (bcrypt-hashed)
+- **Config:** `config/settings.py` is the single entry point — `_get()` checks Streamlit secrets first, then `.env`
 - **Language:** UI and AI responses in Spanish. Code and variable names in English.
 
 ## Architecture
@@ -49,21 +50,27 @@ Odoo/Excel → etl/ → SQLite → analytics/ (pure Python KPIs) → ai/ (Claude
 **Key patterns:**
 - `database/db_manager.py` — All DB access goes through SQLAlchemy helpers (`query_df`, `query_scalar`, `insert_df`). Never use raw sqlite3. Use `query_df_cached()` inside Streamlit pages for auto-caching with 5-min TTL.
 - `ai/cache_manager.py` — MD5 hash of input data as cache key, 4-hour TTL, stored in `ai_analysis_cache` table. Always check cache before calling Claude.
-- `ai/engine.py` — Singleton via `get_engine()`. Handles rate limits (auto-retry), connection errors, and missing API key gracefully.
+- `ai/engine.py` — Singleton via `get_engine()`. Handles rate limits (auto-retry with 5s sleep), connection errors, and missing API key gracefully (`is_available` property).
 - `config_assumptions` table — User assumptions from chat or What-If simulator affect projections system-wide.
 - Every AI prompt includes "Sé directo, usa números específicos" — never allow generic analysis.
+- `ai/alert_generator.py` — Rule-based thresholds: CxC >90 days, DSO >60, concentration >50%, variance >10%, MoM change >15%, cash runway <30 days.
+- `ai/chat_engine.py` — Intent detection is heuristic (keyword matching), not an API call. Intents: assumption, whatif, comparison, recommendation, question.
+- `ai/forecaster.py` — 6-month moving average + trend via numpy polyfit. 3 scenarios: base, optimistic (+10%), pessimistic (-10%). Confidence: 90% → 70% → 50%.
 
 **Database star schema:**
 - Dimensions: `dim_time`, `dim_products`, `dim_customers`, `dim_vendors`, `dim_sellers`, `dim_accounts`, `dim_cost_centers`
 - Facts: `fact_sales`, `fact_receivables`, `fact_payables`, `fact_inventory`, `fact_expenses`, `fact_financials`, `fact_cashflow`
 - Support: `ai_analysis_cache`, `chat_history`, `sync_log`, `config_assumptions`, `config_budgets`
 
-## Adding a New Page
+**Demo data:** `scripts/generate_demo_data.py` generates 24 months of synthetic data (seed=42): ~164 products across 5 categories, 120+ customers (A/B/C segments), 25 vendors, 5 sellers, ~15K sales lines.
 
-1. Create `analytics/new_analytics.py` with pure computation functions
-2. Create `ai/prompts/new_prompts.py` with prompt template
-3. Create `app/pages/N_NewPage.py` following the pattern: `set_page_config` → `require_auth()` → `render_sidebar()` → KPIs → charts → AI box
-4. Add navigation link in `app/components/sidebar.py`
+## Adding a New Module
+
+1. Create `analytics/new_analytics.py` — pure computation, returns DataFrames/dicts
+2. Add KPI function to `analytics/kpi_calculator.py` and wire into `all_kpis()`
+3. Create `ai/prompts/new_prompts.py` with prompt template (Spanish, must include "Sé directo, usa números específicos")
+4. Create `app/pages/N_NewPage.py` following the pattern: `set_page_config()` → `require_auth()` → `render_sidebar()` → KPIs → charts → tables → AI analysis box
+5. Use reusable components: `charts.py` (line/bar/pie/scatter/treemap), `kpi_cards.py` (`kpi_row()`), `tables.py` (`data_table()`), `ai_analysis_box.py`
 
 ## Coding Conventions
 
@@ -72,6 +79,9 @@ Odoo/Excel → etl/ → SQLite → analytics/ (pure Python KPIs) → ai/ (Claude
 - Dashboard must never crash — wrap all API/external calls in try/except
 - Every Streamlit page must call `require_auth()` immediately after `set_page_config()`
 - AI prompts require specific data context (pass real numbers, not placeholders)
+- System prompt role: "Eres el analista financiero ejecutivo de {company_name}"
+- `render_sidebar()` returns `{"period": "YYYY-MM", "comparison_period": "YYYY-MM"}` — use these to filter data
+- No tests exist yet (`tests/` is empty)
 
 ## ETL (Not Yet Connected)
 

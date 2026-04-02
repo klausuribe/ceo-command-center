@@ -31,11 +31,12 @@ def alerts_panel(alerts: list[dict], title: str = "Alertas") -> None:
         icon = LEVEL_ICONS.get(level, "🔵")
         style = LEVEL_STYLES.get(level, "info")
 
-        with getattr(st, style)(icon=icon):
-            st.markdown(f"**{alert['title']}**")
-            st.caption(alert.get("description", ""))
-            if alert.get("action"):
-                st.caption(f"➡️ {alert['action']}")
+        msg = f"**{alert['title']}**"
+        if alert.get("description"):
+            msg += f"\n\n{alert['description']}"
+        if alert.get("action"):
+            msg += f"\n\n➡️ {alert['action']}"
+        getattr(st, style)(msg, icon=icon)
 
 
 def compact_alerts(alerts: list[dict], max_show: int = 5) -> None:

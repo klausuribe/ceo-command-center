@@ -108,8 +108,8 @@ def projection(days: int = 90) -> pd.DataFrame:
 
     avg_inflow = hist["inflow"].mean()
     avg_outflow = hist["outflow"].mean()
-    std_inflow = hist["inflow"].std()
-    std_outflow = hist["outflow"].std()
+    std_inflow = float(hist["inflow"].std()) if len(hist) > 1 else 0.0
+    std_outflow = float(hist["outflow"].std()) if len(hist) > 1 else 0.0
 
     current_balance = query_scalar(
         "SELECT running_balance FROM fact_cashflow "
@@ -118,11 +118,16 @@ def projection(days: int = 90) -> pd.DataFrame:
 
     rows = []
     balance = current_balance
+    day_count = 0
 
-    for i in range(1, days + 1):
+    for i in range(1, days * 2):  # Iterate enough calendar days to get 'days' weekdays
         d = date.today() + timedelta(days=i)
         if d.isoweekday() > 5:  # Skip weekends
             continue
+
+        day_count += 1
+        if day_count > days:
+            break
 
         # Base projection with small random variation for scenarios
         inflow = max(0, avg_inflow)
@@ -141,8 +146,8 @@ def projection(days: int = 90) -> pd.DataFrame:
             "outflow": round(outflow, 2),
             "net_flow": round(net, 2),
             "balance_base": round(balance, 2),
-            "balance_optimistic": round(balance + i * std_inflow * 0.3, 2),
-            "balance_pessimistic": round(balance - i * std_outflow * 0.3, 2),
+            "balance_optimistic": round(balance + day_count * std_inflow * 0.3, 2),
+            "balance_pessimistic": round(balance - day_count * std_outflow * 0.3, 2),
             "is_projected": 1,
         })
 
@@ -168,7 +173,8 @@ def breakeven_days() -> int | None:
 
 
 def _prev_month(period: str) -> str:
-    y, m = int(period[:4]), int(period[5:])
+    p = period[:7]  # Handle both YYYY-MM and YYYY-MM-DD
+    y, m = int(p[:4]), int(p[5:])
     if m == 1:
         return f"{y-1}-12"
     return f"{y}-{m-1:02d}"

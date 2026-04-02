@@ -21,6 +21,7 @@ from database.db_manager import query_df, execute_sql
 
 filters = render_sidebar()
 period = filters["period"]
+date_prefix = filters["date_prefix"]
 
 st.title("🤖 Chat IA & Simulador")
 
@@ -129,7 +130,7 @@ with tab_whatif:
     has_changes = any(v != 0 for v in scenario.values())
 
     if has_changes:
-        results = simulate_scenario(scenario, period)
+        results = simulate_scenario(scenario, date_prefix)
         display_results(results)
 
         st.divider()
@@ -246,15 +247,15 @@ def _scenario_description(scenario: dict) -> str:
     """Generate a human-readable description of a scenario."""
     parts = []
     if scenario.get("sales_change_pct"):
-        parts.append(f"Ventas {scenario['sales_change_pct']:+d}%")
+        parts.append(f"Ventas {int(scenario['sales_change_pct']):+d}%")
     if scenario.get("cost_change_pct"):
-        parts.append(f"Costos {scenario['cost_change_pct']:+d}%")
+        parts.append(f"Costos {int(scenario['cost_change_pct']):+d}%")
     if scenario.get("opex_change_pct"):
-        parts.append(f"Gastos Op. {scenario['opex_change_pct']:+d}%")
+        parts.append(f"Gastos Op. {int(scenario['opex_change_pct']):+d}%")
     if scenario.get("dso_change_days"):
-        parts.append(f"DSO {scenario['dso_change_days']:+d} días")
+        parts.append(f"DSO {int(scenario['dso_change_days']):+d} días")
     if scenario.get("new_investment"):
-        parts.append(f"Inversión Bs {scenario['new_investment']:,}")
+        parts.append(f"Inversión Bs {int(scenario['new_investment']):,}")
     if scenario.get("fixed_expense_change"):
-        parts.append(f"Gastos fijos {scenario['fixed_expense_change']:+,}/mes")
+        parts.append(f"Gastos fijos {int(scenario['fixed_expense_change']):+,}/mes")
     return " | ".join(parts) if parts else "Sin cambios"

@@ -14,16 +14,23 @@ def _current_period() -> str:
     return f"{today.year}-{today.month:02d}"
 
 
+def _month_part(period: str) -> str:
+    """Extract YYYY-MM from a period that may be YYYY-MM or YYYY-MM-DD."""
+    return period[:7]
+
+
 def _prev_period(period: str) -> str:
-    """Return the previous month period."""
-    y, m = int(period[:4]), int(period[5:])
+    """Return the previous month period (YYYY-MM)."""
+    p = _month_part(period)
+    y, m = int(p[:4]), int(p[5:])
     if m == 1:
         return f"{y-1}-12"
     return f"{y}-{m-1:02d}"
 
 
 def _same_period_last_year(period: str) -> str:
-    y, m = int(period[:4]), int(period[5:])
+    p = _month_part(period)
+    y, m = int(p[:4]), int(p[5:])
     return f"{y-1}-{m:02d}"
 
 
@@ -63,7 +70,7 @@ def sales_kpis(period: str | None = None) -> dict:
 
     # Daily velocity
     today = date.today()
-    if period == _current_period():
+    if _month_part(period) == _current_period():
         days_elapsed = today.day
     else:
         days_elapsed = 30  # approximate

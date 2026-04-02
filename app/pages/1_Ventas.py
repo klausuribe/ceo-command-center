@@ -23,11 +23,12 @@ from ai.prompts.sales_prompts import SALES_ANALYSIS
 
 filters = render_sidebar()
 period = filters["period"]
+date_prefix = filters["date_prefix"]
 
 st.title("💰 Ventas")
 
 try:
-    kpis = sales_kpis(period)
+    kpis = sales_kpis(date_prefix)
 
     kpi_row([
         {"label": "Revenue", "value": format_currency(kpis["revenue"]),
@@ -63,7 +64,7 @@ try:
                           title="Revenue por Categoría → Línea")
 
     with col4:
-        pareto = sa.pareto_products(period)
+        pareto = sa.pareto_products(date_prefix)
         if not pareto.empty:
             bar_chart(pareto.head(20), x="name", y="revenue",
                       color="pareto_class", title="Top 20 Productos (Pareto)")
@@ -73,25 +74,25 @@ try:
     # Rankings side by side
     col5, col6 = st.columns(2)
     with col5:
-        top_prod = sa.top_products(10, period=period)
+        top_prod = sa.top_products(10, period=date_prefix)
         ranking_table(top_prod, "Top 10 Productos", "revenue")
 
     with col6:
-        top_cust = sa.top_customers(10, period=period)
+        top_cust = sa.top_customers(10, period=date_prefix)
         ranking_table(top_cust, "Top 10 Clientes", "revenue")
 
     st.divider()
 
     # Seller performance
     st.subheader("👥 Desempeño Vendedores")
-    sellers = sa.seller_performance(period)
+    sellers = sa.seller_performance(date_prefix)
     if not sellers.empty:
         sellers["cumplimiento"] = (sellers["revenue"] / sellers["target_monthly"] * 100).round(1)
         data_table(sellers, currency_cols=["revenue", "gross_profit", "target_monthly"],
                    pct_cols=["cumplimiento"])
 
     # Scatter: Revenue vs Margin
-    scatter_data = sa.revenue_vs_margin_scatter(period)
+    scatter_data = sa.revenue_vs_margin_scatter(date_prefix)
     if not scatter_data.empty:
         scatter_chart(scatter_data, x="revenue", y="avg_margin",
                       color="category", hover_name="name",
@@ -106,12 +107,12 @@ try:
             import json
             data = {
                 "kpis": kpis,
-                "top_products": sa.top_products(5, period=period).to_dict("records"),
-                "top_customers": sa.top_customers(5, period=period).to_dict("records"),
+                "top_products": sa.top_products(5, period=date_prefix).to_dict("records"),
+                "top_customers": sa.top_customers(5, period=date_prefix).to_dict("records"),
                 "sellers": sellers.to_dict("records") if not sellers.empty else [],
             }
             return engine.analyze_module("sales", data,
-                SALES_ANALYSIS.replace("{period}", period))
+                SALES_ANALYSIS.replace("{period}", date_prefix))
         ai_analysis_box("Análisis de Ventas", run_analysis)
     else:
         ai_analysis_box("Análisis de Ventas", None)

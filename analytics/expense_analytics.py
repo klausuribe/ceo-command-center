@@ -89,9 +89,13 @@ def anomalies(period: str | None = None, threshold: float = 2.0) -> pd.DataFrame
         {"p": f"{p}%"}
     )
 
+    if current.empty:
+        return current
+
     merged = current.merge(stats, on="account_id", how="left")
+    merged["hist_std"] = pd.to_numeric(merged["hist_std"], errors="coerce").fillna(1).replace(0, 1)
     merged["z_score"] = ((merged["amount"] - merged["hist_mean"]) /
-                          merged["hist_std"].replace(0, 1)).round(2)
+                          merged["hist_std"]).round(2)
     return merged[merged["z_score"].abs() > threshold].sort_values("z_score", ascending=False)
 
 

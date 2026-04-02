@@ -22,7 +22,7 @@ from ai.engine import get_engine
 from ai.prompts.financial_prompts import FINANCIAL_ANALYSIS
 
 filters = render_sidebar()
-period = filters["period"]
+period = filters["period"]  # Always YYYY-MM for financial queries
 
 st.title("📈 Estados Financieros")
 

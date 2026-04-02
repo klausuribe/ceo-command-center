@@ -34,15 +34,16 @@ from ai.alert_generator import generate_alerts
 
 filters = render_sidebar()
 period = filters["period"]
+date_prefix = filters["date_prefix"]
 
 st.title("🏠 Resumen Ejecutivo")
 
 try:
-    sx = sales_kpis(period)
+    sx = sales_kpis(date_prefix)
     rx = receivables_kpis()
     px = payables_kpis()
     ix = inventory_kpis()
-    ex = expense_kpis(period)
+    ex = expense_kpis(date_prefix)
     cx = cashflow_kpis()
     fx = financial_kpis(period)
 
