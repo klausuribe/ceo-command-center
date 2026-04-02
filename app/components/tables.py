@@ -33,7 +33,10 @@ def data_table(
             if col in styled.columns:
                 styled[col] = styled[col].apply(lambda x: f"{x:.1f}%" if pd.notna(x) else "-")
 
-    st.dataframe(styled, use_container_width=True, height=height, hide_index=True)
+    kwargs = {"use_container_width": True, "hide_index": True}
+    if height is not None:
+        kwargs["height"] = height
+    st.dataframe(styled, **kwargs)
 
 
 def ranking_table(

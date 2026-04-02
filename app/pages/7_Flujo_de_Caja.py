@@ -36,7 +36,7 @@ try:
         {"label": "Ingresos del Mes", "value": format_currency(kpis["month_inflow"])},
         {"label": "Egresos del Mes", "value": format_currency(kpis["month_outflow"])},
         {"label": "Flujo Neto Diario Prom.", "value": format_currency(kpis["avg_daily_net"]),
-         "delta": f"Runway: {'∞' if kpis['runway_days'] is None else f'{int(kpis[\"runway_days\"])} días'}"},
+         "delta": "Runway: ∞" if kpis["runway_days"] is None else f"Runway: {int(kpis['runway_days'])} días"},
     ])
 
     st.divider()
