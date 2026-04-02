@@ -6,21 +6,36 @@ from typing import Any
 import anthropic
 from loguru import logger
 
-from config.settings import ANTHROPIC_API_KEY, COMPANY_NAME
+from config.settings import COMPANY_NAME
 from config.ai_config import MODEL, MAX_TOKENS
 from ai.cache_manager import get_cached, set_cache
 from analytics.kpi_calculator import all_kpis
+
+
+def _resolve_api_key() -> str:
+    """Resolve API key at runtime, checking st.secrets first then .env."""
+    # Try Streamlit secrets (works even if .env failed to load)
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and "ANTHROPIC_API_KEY" in st.secrets:
+            return str(st.secrets["ANTHROPIC_API_KEY"])
+    except Exception:
+        pass
+    # Fall back to settings (loaded from .env)
+    from config.settings import ANTHROPIC_API_KEY
+    return ANTHROPIC_API_KEY
 
 
 class AIEngine:
     """Central AI engine for CEO Command Center."""
 
     def __init__(self) -> None:
-        if not ANTHROPIC_API_KEY or ANTHROPIC_API_KEY == "sk-ant-xxxxxxxxxxxxx":
+        api_key = _resolve_api_key()
+        if not api_key or api_key == "sk-ant-xxxxxxxxxxxxx":
             logger.warning("ANTHROPIC_API_KEY not configured — AI features disabled")
             self.client = None
         else:
-            self.client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+            self.client = anthropic.Anthropic(api_key=api_key)
         self.model = MODEL
         self.max_tokens = MAX_TOKENS
 
@@ -133,8 +148,12 @@ _engine: AIEngine | None = None
 
 
 def get_engine() -> AIEngine:
-    """Return singleton AIEngine instance."""
+    """Return singleton AIEngine instance.
+
+    Re-creates the engine if the previous instance had no API key
+    but a key is now available (e.g. st.secrets loaded after first import).
+    """
     global _engine
-    if _engine is None:
+    if _engine is None or (not _engine.is_available and _resolve_api_key()):
         _engine = AIEngine()
     return _engine
