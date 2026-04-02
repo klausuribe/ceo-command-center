@@ -2,13 +2,14 @@
 
 import calendar
 from datetime import date
+from typing import Optional
 
 import streamlit as st
 from config.settings import APP_NAME, COMPANY_NAME
 from database.db_manager import query_scalar
 
 
-def _latest_period_with_data() -> str | None:
+def _latest_period_with_data() -> Optional[str]:
     """Return the most recent period (YYYY-MM) that has data in fact_sales."""
     return query_scalar(
         "SELECT MAX(substr(date_id,1,7)) FROM fact_sales"
@@ -19,10 +20,10 @@ def render_sidebar() -> dict:
     """Render the global sidebar and return selected filters.
 
     Returns dict with:
-        period: str           — always YYYY-MM (safe for financial queries)
-        date_prefix: str      — YYYY-MM or YYYY-MM-DD (for LIKE queries)
+        period: str            — always YYYY-MM (safe for financial queries)
+        date_prefix: str       — YYYY-MM or YYYY-MM-DD (for LIKE queries)
         comparison_period: str — YYYY-MM
-        day: int | None       — selected day or None for whole month
+        day: int | None        — selected day or None for whole month
     """
     with st.sidebar:
         st.title(f"📊 {APP_NAME}")
@@ -56,7 +57,9 @@ def render_sidebar() -> dict:
                 y -= 1
             periods.append(f"{y}-{m:02d}")
 
-        # Initialize session_state defaults (persist across pages)
+        # Set session_state defaults BEFORE creating widgets.
+        # The key param on each widget reads/writes session_state automatically.
+        # We only set the default once (first visit).
         if "sidebar_period" not in st.session_state:
             latest = _latest_period_with_data()
             if latest and latest in periods:
@@ -70,14 +73,8 @@ def render_sidebar() -> dict:
         if "sidebar_day" not in st.session_state:
             st.session_state.sidebar_day = "Todo el mes"
 
-        # Month selector (persisted via key → session_state)
-        period = st.selectbox(
-            "Período",
-            periods,
-            index=periods.index(st.session_state.sidebar_period)
-            if st.session_state.sidebar_period in periods else 0,
-            key="sidebar_period",
-        )
+        # Month selector — key alone handles persistence, no index param
+        period = st.selectbox("Período", periods, key="sidebar_period")
 
         # Day selector within selected month
         y_sel, m_sel = int(period[:4]), int(period[5:])
@@ -89,13 +86,7 @@ def render_sidebar() -> dict:
                 and st.session_state.sidebar_day not in day_options):
             st.session_state.sidebar_day = "Todo el mes"
 
-        day_selection = st.selectbox(
-            "Día",
-            day_options,
-            index=day_options.index(st.session_state.sidebar_day)
-            if st.session_state.sidebar_day in day_options else 0,
-            key="sidebar_day",
-        )
+        day_selection = st.selectbox("Día", day_options, key="sidebar_day")
 
         # Build date_prefix: YYYY-MM or YYYY-MM-DD
         if day_selection == "Todo el mes":
@@ -109,9 +100,6 @@ def render_sidebar() -> dict:
         comparison = st.selectbox(
             "Comparar con",
             ["Mes anterior", "Mismo mes año pasado"],
-            index=["Mes anterior", "Mismo mes año pasado"].index(
-                st.session_state.sidebar_comparison
-            ),
             key="sidebar_comparison",
         )
 
