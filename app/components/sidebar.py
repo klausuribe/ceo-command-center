@@ -41,6 +41,7 @@ def render_sidebar() -> dict:
         st.page_link("pages/6_Financiero.py", label="📈 Financiero")
         st.page_link("pages/7_Flujo_de_Caja.py", label="🏦 Flujo de Caja")
         st.page_link("pages/8_AI_Chat.py", label="🤖 Chat IA")
+        st.page_link("pages/9_Importar_Datos.py", label="📥 Importar Datos")
         st.divider()
 
         # ── Period filters ──────────────────────────────────────────
