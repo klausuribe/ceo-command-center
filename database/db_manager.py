@@ -13,13 +13,23 @@ from config.settings import DB_PATH
 _engine = None
 
 
+def _enable_fk(dbapi_connection, connection_record):
+    """Enable foreign key enforcement on each new SQLite connection."""
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
+    cursor.close()
+
+
 def get_engine():
     """Return a singleton SQLAlchemy engine for the SQLite database."""
     global _engine
     if _engine is None:
+        from sqlalchemy import event
+
         db_path = Path(DB_PATH).resolve()
         db_path.parent.mkdir(parents=True, exist_ok=True)
         _engine = create_engine(f"sqlite:///{db_path}", echo=False)
+        event.listen(_engine, "connect", _enable_fk)
         logger.info(f"Database engine created: {db_path}")
     return _engine
 

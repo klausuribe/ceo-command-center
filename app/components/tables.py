@@ -2,6 +2,7 @@
 
 import pandas as pd
 import streamlit as st
+from config.settings import DEFAULT_CURRENCY
 
 
 def data_table(
@@ -25,7 +26,7 @@ def data_table(
     if currency_cols:
         for col in currency_cols:
             if col in styled.columns:
-                styled[col] = styled[col].apply(lambda x: f"Bs {x:,.2f}" if pd.notna(x) else "-")
+                styled[col] = styled[col].apply(lambda x: f"{DEFAULT_CURRENCY} {x:,.2f}" if pd.notna(x) else "-")
 
     # Format percentage columns
     if pct_cols:
@@ -62,7 +63,7 @@ def ranking_table(
     st.dataframe(
         display,
         column_config={
-            value_col: st.column_config.NumberColumn(format="Bs %.0f"),
+            value_col: st.column_config.NumberColumn(format=f"{DEFAULT_CURRENCY} %.0f"),
             "progress": st.column_config.ProgressColumn(
                 "Rel.", min_value=0, max_value=1, format="%.0f%%"
             ) if show_bar else None,

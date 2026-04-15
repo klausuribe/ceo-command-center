@@ -34,9 +34,11 @@ try:
         {"label": "Gastos del Mes", "value": format_currency(kpis["total_expenses"])},
         {"label": "Presupuesto", "value": format_currency(kpis["total_budget"])},
         {"label": "Variación", "value": format_currency(kpis["total_variance"]),
-         "delta": f"{kpis['variance_pct']:+.1f}%"},
+         "delta": f"{kpis['variance_pct']:+.1f}%",
+         "help": "Diferencia entre gasto real y presupuestado. Positivo = sobre presupuesto"},
         {"label": "Ejecución", "value": format_pct(
-            kpis["total_expenses"] / kpis["total_budget"] * 100 if kpis["total_budget"] else 0)},
+            kpis["total_expenses"] / kpis["total_budget"] * 100 if kpis["total_budget"] else 0),
+         "help": "% del presupuesto mensual consumido. Ideal: 90-100%"},
     ])
 
     st.divider()
@@ -112,4 +114,5 @@ try:
         ai_analysis_box("Análisis de Gastos", None)
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error al cargar datos de gastos: {e}")
+    st.info("Verifica que la base de datos esté inicializada y tenga datos.")

@@ -62,13 +62,17 @@ try:
     # Row 2: Operations
     kpi_row([
         {"label": "CxC Abiertas", "value": format_currency(rx["total_balance"]),
-         "delta": f"DSO: {rx['dso']:.0f} días", "delta_color": "inverse"},
+         "delta": f"DSO: {rx['dso']:.0f} días", "delta_color": "inverse",
+         "help": "Cuentas por cobrar pendientes. DSO = días promedio de cobro"},
         {"label": "CxP Abiertas", "value": format_currency(px["total_balance"]),
-         "delta": f"{int(px['critical_count'])} críticas", "delta_color": "inverse"},
+         "delta": f"{int(px['critical_count'])} críticas", "delta_color": "inverse",
+         "help": "Cuentas por pagar pendientes. Críticas = vencidas con prioridad alta"},
         {"label": "Inventario", "value": format_currency(ix["total_value"]),
-         "delta": f"{ix['stockout_risk']} en riesgo stockout", "delta_color": "inverse"},
+         "delta": f"{ix['stockout_risk']} en riesgo stockout", "delta_color": "inverse",
+         "help": "Valor total a costo. Riesgo stockout = productos A/B con <7 días de stock"},
         {"label": "Gastos vs Presupuesto", "value": format_currency(ex["total_expenses"]),
-         "delta": f"{ex['variance_pct']:+.1f}%"},
+         "delta": f"{ex['variance_pct']:+.1f}%",
+         "help": "Positivo = sobre presupuesto, negativo = bajo presupuesto"},
     ])
 
     st.divider()
@@ -93,10 +97,14 @@ try:
     # Quick ratio overview
     st.subheader("📊 Indicadores Clave")
     r1, r2, r3, r4 = st.columns(4)
-    r1.metric("Razón Corriente", f"{fx['current_ratio']:.2f}")
-    r2.metric("ROE", format_pct(fx["roe"]))
-    r3.metric("Deuda/Patrimonio", f"{fx['debt_to_equity']:.2f}")
-    r4.metric("Cobertura Intereses", f"{fx['interest_coverage']:.1f}x")
+    r1.metric("Razón Corriente", f"{fx['current_ratio']:.2f}",
+              help="Activo Corriente / Pasivo Corriente. >1 = puede cubrir deudas corto plazo")
+    r2.metric("ROE", format_pct(fx["roe"]),
+              help="Return on Equity — rentabilidad sobre el patrimonio")
+    r3.metric("Deuda/Patrimonio", f"{fx['debt_to_equity']:.2f}",
+              help="Pasivo Total / Patrimonio. <1 = conservador, >2 = alto apalancamiento")
+    r4.metric("Cobertura Intereses", f"{fx['interest_coverage']:.1f}x",
+              help="EBIT / Gastos Financieros. >3x = cómodo, <1.5x = riesgo")
 
 except Exception as e:
     st.error(f"Error al cargar datos: {e}")

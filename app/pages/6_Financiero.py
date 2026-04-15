@@ -59,12 +59,16 @@ try:
             data_table(cs, title="Estado de Resultados",
                        currency_cols=["amount", "prev_period", "prev_year", "budget"],
                        pct_cols=["pct_of_revenue"])
+        else:
+            st.info(f"No hay datos del estado de resultados para {period}.")
 
     with tab2:
         bs_df = fa.balance_sheet(period)
         if not bs_df.empty:
             data_table(bs_df, title="Balance General",
                        currency_cols=["amount", "prev_period", "prev_year"])
+        else:
+            st.info(f"No hay datos del balance general para {period}.")
 
     with tab3:
         col1, col2 = st.columns(2)
@@ -122,4 +126,5 @@ try:
         ai_analysis_box("Análisis Financiero", None)
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error al cargar datos financieros: {e}")
+    st.info("Verifica que la base de datos esté inicializada y tenga datos.")

@@ -167,9 +167,15 @@ def rfm_analysis() -> pd.DataFrame:
     # Recency: days since last purchase
     df["recency_days"] = (pd.to_datetime(today) - pd.to_datetime(df["last_purchase"])).dt.days
 
-    # Score 1-5 (5 = best)
+    # Score 1-5 (5 = best). Use min(5, unique values) to handle small datasets.
     for col, ascending in [("recency_days", True), ("frequency", False), ("monetary", False)]:
-        df[f"{col}_score"] = pd.qcut(df[col], q=5, labels=[5, 4, 3, 2, 1] if ascending else [1, 2, 3, 4, 5], duplicates="drop").astype(int)
+        n_unique = df[col].nunique()
+        q = min(5, n_unique)
+        if q < 2:
+            df[f"{col}_score"] = 3  # neutral score when no variance
+        else:
+            labels = list(range(q, 0, -1)) if ascending else list(range(1, q + 1))
+            df[f"{col}_score"] = pd.qcut(df[col], q=q, labels=labels, duplicates="drop").astype(int)
 
     df["rfm_score"] = df["recency_days_score"] + df["frequency_score"] + df["monetary_score"]
 

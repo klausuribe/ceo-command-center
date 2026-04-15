@@ -1,6 +1,7 @@
 """Reusable KPI card components."""
 
 import streamlit as st
+from config.settings import DEFAULT_CURRENCY
 
 
 def kpi_card(
@@ -37,8 +38,9 @@ def kpi_row(metrics: list[dict], cols: int = 4) -> None:
             )
 
 
-def format_currency(value: float, prefix: str = "Bs") -> str:
+def format_currency(value: float, prefix: str | None = None) -> str:
     """Format a number as currency."""
+    prefix = prefix or DEFAULT_CURRENCY
     if abs(value) >= 1_000_000:
         return f"{prefix} {value/1_000_000:,.1f}M"
     elif abs(value) >= 1_000:

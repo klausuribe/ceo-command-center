@@ -81,7 +81,7 @@ def credit_score() -> pd.DataFrame:
     if df.empty:
         return df
 
-    df["on_time_pct"] = df["on_time"] / df["total_invoices"]
+    df["on_time_pct"] = df["on_time"] / df["total_invoices"].replace(0, 1)
     df["paid_pct"] = 1 - (df["total_balance"] / df["total_original"].replace(0, 1))
 
     # Score: weighted formula

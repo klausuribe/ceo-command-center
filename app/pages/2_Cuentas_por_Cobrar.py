@@ -29,12 +29,15 @@ try:
     kpis = receivables_kpis()
 
     kpi_row([
-        {"label": "Saldo Total CxC", "value": format_currency(kpis["total_balance"])},
+        {"label": "Saldo Total CxC", "value": format_currency(kpis["total_balance"]),
+         "help": "Suma de facturas pendientes de cobro (excluye pagadas)"},
         {"label": "Vencido", "value": format_currency(kpis["overdue"]),
-         "delta_color": "inverse"},
+         "delta_color": "inverse",
+         "help": "Facturas que superaron su fecha de vencimiento"},
         {"label": "DSO", "value": f"{kpis['dso']:.0f} días",
-         "help": "Days Sales Outstanding"},
-        {"label": "Concentración Top 5", "value": format_pct(kpis["top5_concentration_pct"])},
+         "help": "Days Sales Outstanding — días promedio para cobrar. Ideal: <45 días"},
+        {"label": "Concentración Top 5", "value": format_pct(kpis["top5_concentration_pct"]),
+         "help": "% del saldo CxC concentrado en los 5 mayores deudores. >50% = riesgo alto"},
     ])
 
     st.divider()
@@ -73,6 +76,8 @@ try:
         data_table(scores[["name", "segment", "score", "risk_level", "on_time_pct",
                            "total_balance"]].head(20),
                    currency_cols=["total_balance"], pct_cols=["on_time_pct"])
+    else:
+        st.info("No hay suficientes datos para calcular credit scores.")
 
     # Upcoming due
     st.subheader("📅 Próximos Vencimientos (7 días)")
@@ -107,4 +112,5 @@ try:
         ai_analysis_box("Análisis de Cobranza", None)
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error al cargar datos de cobranza: {e}")
+    st.info("Verifica que la base de datos esté inicializada y tenga datos.")

@@ -32,10 +32,13 @@ try:
 
     kpi_row([
         {"label": "Revenue", "value": format_currency(kpis["revenue"]),
-         "delta": f"{kpis['mom_change_pct']:+.1f}% MoM"},
-        {"label": "Margen Bruto", "value": format_pct(kpis["avg_margin"] * 100)},
+         "delta": f"{kpis['mom_change_pct']:+.1f}% MoM",
+         "help": "Ventas totales facturadas en el período seleccionado"},
+        {"label": "Margen Bruto", "value": format_pct(kpis["avg_margin"] * 100),
+         "help": "Promedio de (precio - costo) / precio por línea de factura"},
         {"label": "Facturas", "value": f"{int(kpis['n_invoices']):,}"},
-        {"label": "Clientes Activos", "value": f"{int(kpis['n_customers'])}"},
+        {"label": "Clientes Activos", "value": f"{int(kpis['n_customers'])}",
+         "help": "Clientes con al menos una factura en el período"},
     ])
 
     st.divider()
@@ -87,9 +90,11 @@ try:
     st.subheader("👥 Desempeño Vendedores")
     sellers = sa.seller_performance(date_prefix)
     if not sellers.empty:
-        sellers["cumplimiento"] = (sellers["revenue"] / sellers["target_monthly"] * 100).round(1)
+        sellers["cumplimiento"] = (sellers["revenue"] / sellers["target_monthly"].replace(0, 1) * 100).round(1)
         data_table(sellers, currency_cols=["revenue", "gross_profit", "target_monthly"],
                    pct_cols=["cumplimiento"])
+    else:
+        st.info("No hay datos de vendedores para este período.")
 
     # Scatter: Revenue vs Margin
     scatter_data = sa.revenue_vs_margin_scatter(date_prefix)
@@ -118,4 +123,5 @@ try:
         ai_analysis_box("Análisis de Ventas", None)
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error al cargar datos de ventas: {e}")
+    st.info("Verifica que la base de datos esté inicializada y tenga datos.")

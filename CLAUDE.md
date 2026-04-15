@@ -20,6 +20,10 @@ streamlit run app/Home.py              # Launch dashboard
 
 # Login: ceo / admin123
 
+# Tests
+python -m pytest tests/ -v             # Run all tests
+python -m pytest tests/test_analytics.py -k "test_rfm"  # Run single test
+
 # Verify everything works
 python -c "from analytics.kpi_calculator import all_kpis; print(all_kpis().keys())"
 python -c "from ai.engine import get_engine; e = get_engine(); print(e.is_available)"
@@ -48,12 +52,12 @@ Odoo/Excel → etl/ → SQLite → analytics/ (pure Python KPIs) → ai/ (Claude
 3. `app/` — Streamlit pages consume analytics + AI. Reusable components in `app/components/`. Every page follows: `set_page_config()` → `require_auth()` → `render_sidebar()` → KPIs → charts → tables → AI analysis box.
 
 **Key patterns:**
-- `database/db_manager.py` — All DB access goes through SQLAlchemy helpers (`query_df`, `query_scalar`, `insert_df`). Never use raw sqlite3. Use `query_df_cached()` inside Streamlit pages for auto-caching with 5-min TTL.
+- `database/db_manager.py` — All DB access goes through SQLAlchemy helpers (`query_df`, `query_scalar`, `insert_df`). Never use raw sqlite3. Foreign key constraints enforced via `PRAGMA foreign_keys = ON`. Use `query_df_cached()` inside Streamlit pages for auto-caching with 5-min TTL.
 - `ai/cache_manager.py` — MD5 hash of input data as cache key, 4-hour TTL, stored in `ai_analysis_cache` table. Always check cache before calling Claude.
 - `ai/engine.py` — Singleton via `get_engine()`. Handles rate limits (auto-retry with 5s sleep), connection errors, and missing API key gracefully (`is_available` property).
 - `config_assumptions` table — User assumptions from chat or What-If simulator affect projections system-wide.
 - Every AI prompt includes "Sé directo, usa números específicos" — never allow generic analysis.
-- `ai/alert_generator.py` — Rule-based thresholds: CxC >90 days, DSO >60, concentration >50%, variance >10%, MoM change >15%, cash runway <30 days.
+- `ai/alert_generator.py` — Rule-based thresholds defined in `config/ai_config.py:ALERT_THRESHOLDS` (DSO >60, concentration >50%, variance >10%, MoM change >15%, cash runway <30 days). Currency uses `DEFAULT_CURRENCY` from settings.
 - `ai/chat_engine.py` — Intent detection is heuristic (keyword matching), not an API call. Intents: assumption, whatif, comparison, recommendation, question.
 - `ai/forecaster.py` — 6-month moving average + trend via numpy polyfit. 3 scenarios: base, optimistic (+10%), pessimistic (-10%). Confidence: 90% → 70% → 50%.
 
@@ -75,17 +79,19 @@ Odoo/Excel → etl/ → SQLite → analytics/ (pure Python KPIs) → ai/ (Claude
 ## Coding Conventions
 
 - Python 3.12, type hints on all functions
-- `loguru` for logging, f-strings for formatting
+- `loguru` for logging (centralized in `config/logging_config.py`, optional file rotation via `LOG_FILE` env var), f-strings for formatting
 - Dashboard must never crash — wrap all API/external calls in try/except
 - Every Streamlit page must call `require_auth()` immediately after `set_page_config()`
 - AI prompts require specific data context (pass real numbers, not placeholders)
 - System prompt role: "Eres el analista financiero ejecutivo de {company_name}"
-- `render_sidebar()` returns `{"period": "YYYY-MM", "comparison_period": "YYYY-MM"}` — use these to filter data
-- No tests exist yet (`tests/` is empty)
+- `render_sidebar()` returns `{"period": "YYYY-MM", "date_prefix": "YYYY-MM or YYYY-MM-DD", "comparison_period": "YYYY-MM", "day": int | None}` — use `date_prefix` for SQL `LIKE` queries, `period` for financial lookups
+- Every page under `app/pages/` must start with `sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))` before other project imports
+- Tests use in-memory SQLite with the real schema (see `tests/conftest.py`). Use the `seeded_db` fixture for tests with data, `db` for empty-DB edge cases
+- Currency formatting uses `DEFAULT_CURRENCY` from `config/settings.py` — never hardcode `"Bs"`
 
-## ETL (Not Yet Connected)
+## ETL
 
-Odoo ETL modules in `etl/` are stubbed. When Odoo access becomes available:
+`etl/file_importer.py` is functional — supports Excel/CSV import with column mapping via the `9_Importar_Datos.py` page. Odoo ETL (`etl/odoo_xml_rpc.py`) is stubbed. When Odoo access becomes available:
 - `docs/odoo_models.md` — Complete field mappings for all Odoo models
 - `config/odoo_config.py` — Sync schedule per data type
 - The app currently runs entirely on demo data from `scripts/generate_demo_data.py`

@@ -29,12 +29,15 @@ try:
     kpis = inventory_kpis()
 
     kpi_row([
-        {"label": "Valor Total", "value": format_currency(kpis["total_value"])},
+        {"label": "Valor Total", "value": format_currency(kpis["total_value"]),
+         "help": "Valor total del inventario a costo unitario"},
         {"label": "SKUs Activos", "value": f"{int(kpis['total_skus'])}"},
         {"label": "Bajo Reorden", "value": f"{int(kpis['below_reorder'])}",
-         "delta": "requieren pedido", "delta_color": "inverse"},
+         "delta": "requieren pedido", "delta_color": "inverse",
+         "help": "Productos cuyo stock disponible está por debajo del punto de reorden"},
         {"label": "Dead Stock", "value": format_currency(kpis["dead_stock_value"]),
-         "delta": f"{int(kpis['dead_stock_count'])} SKUs", "delta_color": "inverse"},
+         "delta": f"{int(kpis['dead_stock_count'])} SKUs", "delta_color": "inverse",
+         "help": "Productos sin movimiento de venta — candidatos a liquidación"},
     ])
 
     st.divider()
@@ -111,4 +114,5 @@ try:
         ai_analysis_box("Análisis de Inventario", None)
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error al cargar datos de inventario: {e}")
+    st.info("Verifica que la base de datos esté inicializada y tenga datos.")

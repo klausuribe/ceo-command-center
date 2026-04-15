@@ -30,13 +30,17 @@ try:
     cvp = pa.cash_vs_payables()
 
     kpi_row([
-        {"label": "Total CxP", "value": format_currency(kpis["total_balance"])},
+        {"label": "Total CxP", "value": format_currency(kpis["total_balance"]),
+         "help": "Suma de facturas pendientes de pago a proveedores"},
         {"label": "Vencido", "value": format_currency(kpis["overdue"]),
-         "delta_color": "inverse"},
-        {"label": "Próx. 7 días", "value": format_currency(kpis["due_next_7d"])},
+         "delta_color": "inverse",
+         "help": "Facturas que superaron su fecha de vencimiento"},
+        {"label": "Próx. 7 días", "value": format_currency(kpis["due_next_7d"]),
+         "help": "Monto a pagar en los próximos 7 días"},
         {"label": "Cash vs CxP 30d",
          "value": "OK" if cvp["coverage_30d"] else f"Gap: {format_currency(cvp['gap_30d'])}",
-         "delta_color": "normal" if cvp["coverage_30d"] else "inverse"},
+         "delta_color": "normal" if cvp["coverage_30d"] else "inverse",
+         "help": "Compara el efectivo disponible con los pagos de los próximos 30 días"},
     ])
 
     st.divider()
@@ -62,6 +66,8 @@ try:
         data_table(priority[["vendor", "invoice_number", "balance", "due_date",
                              "days_overdue", "priority", "urgency_score"]].head(20),
                    currency_cols=["balance"])
+    else:
+        st.info("No hay pagos pendientes para priorizar.")
 
     # Upcoming payments
     st.subheader("📅 Pagos Próximos (30 días)")
@@ -94,4 +100,5 @@ try:
         ai_analysis_box("Análisis de Pagos", None)
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error al cargar datos de pagos: {e}")
+    st.info("Verifica que la base de datos esté inicializada y tenga datos.")

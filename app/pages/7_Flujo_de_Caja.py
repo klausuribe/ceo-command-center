@@ -32,11 +32,13 @@ try:
     breakeven = ca.breakeven_days()
 
     kpi_row([
-        {"label": "Saldo Actual", "value": format_currency(kpis["current_balance"])},
+        {"label": "Saldo Actual", "value": format_currency(kpis["current_balance"]),
+         "help": "Último saldo registrado en caja"},
         {"label": "Ingresos del Mes", "value": format_currency(kpis["month_inflow"])},
         {"label": "Egresos del Mes", "value": format_currency(kpis["month_outflow"])},
         {"label": "Flujo Neto Diario Prom.", "value": format_currency(kpis["avg_daily_net"]),
-         "delta": "Runway: ∞" if kpis["runway_days"] is None else f"Runway: {int(kpis['runway_days'])} días"},
+         "delta": "Runway: ∞" if kpis["runway_days"] is None else f"Runway: {int(kpis['runway_days'])} días",
+         "help": "Promedio diario de ingresos - egresos (últimos 30 días). Runway = días hasta agotar caja al ritmo actual"},
     ])
 
     st.divider()
@@ -111,4 +113,5 @@ try:
         ai_analysis_box("Análisis de Flujo de Caja", None)
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error al cargar datos de flujo de caja: {e}")
+    st.info("Verifica que la base de datos esté inicializada y tenga datos.")

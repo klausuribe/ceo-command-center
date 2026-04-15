@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import config.logging_config  # noqa: F401 — initialize loguru early
 
 # Load .env from project root (local dev)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

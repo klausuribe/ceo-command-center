@@ -16,7 +16,7 @@ def abc_classification() -> pd.DataFrame:
     )
     if df.empty:
         return df
-    total = df["total_value"].sum()
+    total = df["total_value"].sum() or 1
     df["value_pct"] = df["total_value"] / total * 100
     df["cumulative_pct"] = df["value_pct"].cumsum()
     df["abc_value"] = df["cumulative_pct"].apply(

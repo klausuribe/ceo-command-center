@@ -108,8 +108,8 @@ def projection(days: int = 90) -> pd.DataFrame:
 
     avg_inflow = hist["inflow"].mean()
     avg_outflow = hist["outflow"].mean()
-    std_inflow = float(hist["inflow"].std()) if len(hist) > 1 else 0.0
-    std_outflow = float(hist["outflow"].std()) if len(hist) > 1 else 0.0
+    std_inflow = float(hist["inflow"].std() or 0) if len(hist) > 1 else 0.0
+    std_outflow = float(hist["outflow"].std() or 0) if len(hist) > 1 else 0.0
 
     current_balance = query_scalar(
         "SELECT running_balance FROM fact_cashflow "
