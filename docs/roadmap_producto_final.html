@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CEO Command Center — Roadmap a Producto Final</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 22mm 16mm;
+    @bottom-right {
+      content: "Página " counter(page) " / " counter(pages);
+      font-family: "Helvetica", sans-serif;
+      font-size: 9pt;
+      color: #888;
+    }
+    @bottom-left {
+      content: "CEO Command Center · Roadmap · Klaus Uribe · 2026-04-16";
+      font-family: "Helvetica", sans-serif;
+      font-size: 9pt;
+      color: #888;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 10.5pt; }
+  body {
+    font-family: "Helvetica", Arial, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.45;
+    margin: 0;
+  }
+  h1 {
+    font-size: 24pt;
+    color: #0f172a;
+    border-bottom: 3px solid #2563eb;
+    padding-bottom: 6pt;
+    margin-top: 0;
+    margin-bottom: 6pt;
+  }
+  h1 .sub {
+    font-size: 12pt;
+    font-weight: normal;
+    color: #64748b;
+    display: block;
+    margin-top: 4pt;
+  }
+  h2 {
+    font-size: 15pt;
+    color: #0f172a;
+    margin-top: 22pt;
+    margin-bottom: 6pt;
+    padding-left: 8pt;
+    border-left: 4px solid #2563eb;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 12pt;
+    color: #1e293b;
+    margin-top: 14pt;
+    margin-bottom: 4pt;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 10.5pt;
+    color: #334155;
+    margin-top: 10pt;
+    margin-bottom: 3pt;
+    page-break-after: avoid;
+  }
+  p { margin: 4pt 0 6pt 0; }
+  ul, ol { margin: 4pt 0 8pt 0; padding-left: 18pt; }
+  li { margin-bottom: 3pt; }
+  code {
+    font-family: "Courier New", monospace;
+    background: #f1f5f9;
+    padding: 1pt 4pt;
+    border-radius: 2pt;
+    font-size: 9.5pt;
+    color: #334155;
+  }
+  .meta {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10pt 14pt;
+    border-radius: 4pt;
+    font-size: 9.5pt;
+    color: #475569;
+    margin-bottom: 18pt;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8pt 0 14pt 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+  thead th {
+    background: #1e293b;
+    color: #f8fafc;
+    text-align: left;
+    padding: 6pt 8pt;
+    font-weight: 600;
+    font-size: 9pt;
+    letter-spacing: 0.2pt;
+  }
+  tbody td {
+    padding: 6pt 8pt;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  tbody tr:nth-child(odd) { background: #f8fafc; }
+  .phase-num {
+    font-weight: 700;
+    color: #2563eb;
+    text-align: center;
+    width: 28pt;
+  }
+  .time-col {
+    text-align: center;
+    color: #475569;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    width: 60pt;
+  }
+  .callout {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 8pt 12pt;
+    margin: 10pt 0;
+    font-size: 9.5pt;
+    border-radius: 2pt;
+    page-break-inside: avoid;
+  }
+  .callout strong { color: #78350f; }
+  .tip {
+    background: #ecfdf5;
+    border-left: 4px solid #10b981;
+    padding: 8pt 12pt;
+    margin: 10pt 0;
+    font-size: 9.5pt;
+    border-radius: 2pt;
+    page-break-inside: avoid;
+  }
+  .tip strong { color: #064e3b; }
+  .warning {
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+    padding: 8pt 12pt;
+    margin: 10pt 0;
+    font-size: 9.5pt;
+    border-radius: 2pt;
+    page-break-inside: avoid;
+  }
+  .warning strong { color: #7f1d1d; }
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li {
+    padding-left: 20pt;
+    position: relative;
+    margin-bottom: 5pt;
+  }
+  .checklist li:before {
+    content: "☐";
+    position: absolute;
+    left: 0;
+    top: -1pt;
+    font-size: 13pt;
+    color: #94a3b8;
+  }
+  .checklist li.crit:before { color: #dc2626; content: "⚠"; }
+  .checklist li.crit { font-weight: 600; }
+  .page-break { page-break-before: always; }
+  .gap-options {
+    font-size: 9pt;
+    color: #475569;
+    padding-left: 14pt;
+    margin-top: 3pt;
+  }
+  .gap-options li { margin-bottom: 2pt; }
+  .rec {
+    color: #065f46;
+    font-weight: 600;
+    font-size: 9pt;
+  }
+  .small { font-size: 9pt; color: #64748b; }
+</style>
+</head>
+<body>
+
+<h1>CEO Command Center<span class="sub">Roadmap a Producto Final + Checklist reunión con ingeniero de Odoo</span></h1>
+
+<div class="meta">
+  <strong>Autor:</strong> Klaus Uribe &nbsp;·&nbsp;
+  <strong>Fecha:</strong> 16 de abril de 2026 &nbsp;·&nbsp;
+  <strong>Versión:</strong> 1.0 &nbsp;·&nbsp;
+  <strong>Estado actual:</strong> Fase 0 completada, backend FastAPI corriendo junto a Streamlit
+</div>
+
+<h2>1. Contexto y estado actual</h2>
+<p>
+  El CEO Command Center corre hoy como una aplicación Streamlit funcional (MVP) con datos demo
+  sintéticos sobre SQLite. La arquitectura de tres capas ya separa analítica (<code>analytics/</code>),
+  motor de IA (<code>ai/</code>) y UI, lo cual permite introducir un backend FastAPI sin reescribir
+  lógica.
+</p>
+<p><strong>Ya entregado (antes de este roadmap):</strong></p>
+<ul>
+  <li>10 páginas Streamlit funcionales con KPIs, charts, tablas y análisis IA por módulo.</li>
+  <li>Módulo de Presupuesto con proyección histórica y supuestos estructurados.</li>
+  <li>Autenticación vía <code>streamlit-authenticator</code> + bcrypt.</li>
+  <li>78 tests de analytics/KPIs + 13 tests de backend = 91 verdes.</li>
+  <li><strong>Fase 0 del backend</strong>: FastAPI con JWT, 5 endpoints (<code>/health</code>,
+    <code>/auth/login</code>, <code>/auth/token</code>, <code>/auth/refresh</code>, <code>/auth/me</code>,
+    <code>/kpis/all</code>), OpenAPI automática, Docker Compose con Postgres, convive con Streamlit sin romper nada.</li>
+</ul>
+
+<h2>2. Roadmap completo a producto final</h2>
+<p>Quedan <strong>6 fases</strong> para llegar a "entrega final para cliente".
+Tiempo total estimado: <strong>7-10 semanas</strong> de trabajo efectivo solo-dev.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:40pt;">#</th>
+      <th>Fase</th>
+      <th>Entregables clave</th>
+      <th style="width:70pt;">Tiempo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="phase-num">1</td>
+      <td><strong>API Layer completo</strong></td>
+      <td>
+        Todas las funciones de <code>analytics/</code> y <code>ai/</code> expuestas como endpoints REST tipados,
+        organizados por módulo: <code>/api/sales/*</code>, <code>/api/receivables/*</code>, <code>/api/payables/*</code>,
+        <code>/api/inventory/*</code>, <code>/api/expenses/*</code>, <code>/api/financial/*</code>,
+        <code>/api/cashflow/*</code>, <code>/api/budget/*</code>, <code>/api/ai/*</code>.
+        Schemas Pydantic estrictos por módulo. Paginación y filtros. Rate limiting básico.
+      </td>
+      <td class="time-col">1-2 sem</td>
+    </tr>
+    <tr>
+      <td class="phase-num">2</td>
+      <td><strong>Frontend base</strong></td>
+      <td>
+        Next.js 15 (App Router) + TypeScript + Tailwind v4 + shadcn/ui scaffolding.
+        NextAuth v5 para sesiones. Layout con sidebar. Cliente API auto-generado desde OpenAPI (orval).
+        Primera página end-to-end: Resumen Ejecutivo con KPIs y charts ECharts.
+      </td>
+      <td class="time-col">1 sem</td>
+    </tr>
+    <tr>
+      <td class="phase-num">3</td>
+      <td><strong>Migración de páginas</strong></td>
+      <td>
+        Las 10 páginas Streamlit recreadas en Next.js: Ventas, CxC, CxP, Inventarios, Gastos,
+        Financiero, Flujo de Caja, Presupuesto, AI Chat, Importar Datos. Stack de cada página:
+        TanStack Query para fetching, ECharts para visualización, TanStack Table v8 para tablas
+        con virtualización, React Hook Form + zod para formularios.
+      </td>
+      <td class="time-col">2-3 sem</td>
+    </tr>
+    <tr>
+      <td class="phase-num">4</td>
+      <td><strong>ETL real de Odoo</strong></td>
+      <td>
+        XML-RPC client de producción con pool de conexiones, retry + backoff exponencial, delta sync
+        por <code>write_date</code>, paginación de resultados. Sync jobs por módulo con APScheduler.
+        Reemplaza <code>scripts/generate_demo_data.py</code> como fuente de verdad.
+        Logging estructurado en <code>sync_log</code>.
+      </td>
+      <td class="time-col">1-2 sem</td>
+    </tr>
+    <tr>
+      <td class="phase-num">5</td>
+      <td><strong>Producción</strong></td>
+      <td>
+        Migración SQLite → Postgres con Alembic. Rate limiting (slowapi). Sentry para errores.
+        Security headers (CSP, HSTS, X-Frame-Options). Logging estructurado a Axiom/Logtail.
+        Dockerfile multi-stage optimizado. CI/CD con GitHub Actions.
+        Deploy: Vercel (frontend) + Fly.io (backend) + Neon/Fly Postgres. Custom domain + HTTPS automático.
+      </td>
+      <td class="time-col">1-2 sem</td>
+    </tr>
+    <tr>
+      <td class="phase-num">6</td>
+      <td><strong>QA + Docs + Handoff</strong></td>
+      <td>
+        Suite E2E completa con Playwright. Load testing básico (K6). Auditoría de accesibilidad.
+        Manual de usuario en español (PDF imprimible). Guía de administrador (backup, restore,
+        gestión de usuarios). Runbook de incidentes. API docs publicadas (Redocly).
+      </td>
+      <td class="time-col">3-5 días</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="tip">
+  <strong>Tip de paralelización:</strong> Fases 1 y 2 pueden arrancar en paralelo si alguien colabora con frontend.
+  Fase 4 (Odoo ETL) es independiente del frontend — podés construirla mientras se migran páginas.
+  Fase 6 siempre va al final.
+</div>
+
+<div class="callout">
+  <strong>Decisión de gating:</strong> Fase 4 depende <strong>críticamente</strong> de las respuestas
+  del ingeniero de Odoo. Sin esas definiciones, se puede hacer el ETL pero con suposiciones que
+  quizá haya que deshacer. Por eso esta reunión es el mayor desbloqueador del proyecto.
+</div>
+
+<h2 class="page-break">3. Checklist para reunión con ingeniero de Odoo</h2>
+<p class="small">Tiempo estimado: 45-60 min. Los ítems marcados con ⚠ son decisiones que bloquean Fase 4.</p>
+
+<h3>Bloque A — Stack y configuración</h3>
+<ul class="checklist">
+  <li class="crit">Versión exacta de Odoo (v16 / v17 / v18) y Community vs Enterprise</li>
+  <li>Hosting: ¿Odoo.sh, servidor propio, on-prem?</li>
+  <li>Lista de módulos instalados relevantes:
+    <code>sale</code>, <code>account</code>, <code>stock</code>, <code>purchase</code>,
+    <code>l10n_bo</code>, <code>account_budget</code>, <code>hr_payroll</code></li>
+</ul>
+
+<h3>Bloque B — Contabilidad (bloque más crítico)</h3>
+<ul class="checklist">
+  <li class="crit">¿Usan contabilidad analítica (<code>analytic_distribution</code>)? Si no, ¿se puede activar?</li>
+  <li>Si usan: ¿qué cuentas analíticas corresponden a cada <strong>centro de costo</strong> del dashboard
+    (Admin, Comercial, Marketing, Almacén, RRHH, TI)?</li>
+  <li class="crit">Plan de cuentas localizado Bolivia (<code>l10n_bo</code>) o custom? Pedir CSV export de
+    <code>account.account</code> con columnas: <code>code, name, account_type, group_id</code></li>
+  <li>¿Cómo están agrupadas las cuentas (<code>account.group</code>) en: Ingresos, Costos, Gastos Operativos,
+    Gastos Financieros, Impuestos, Activo Corriente, Activo No Corriente, Pasivo Corriente,
+    Pasivo No Corriente, Patrimonio?</li>
+  <li class="crit">¿Manejan presupuestos en Odoo? ¿Con qué módulo (<code>account_budget</code>, custom)?</li>
+</ul>
+
+<h3>Bloque C — Productos y clientes</h3>
+<ul class="checklist">
+  <li class="crit">¿Cómo clasifican productos por línea/marca/segmento?
+    (<code>product.tag</code> de Odoo 17+, categorías jerárquicas, custom fields, nada)</li>
+  <li>¿Clasificación A/B/C de clientes existe en Odoo? ¿Dónde?</li>
+  <li>¿<code>credit_limit</code> y <code>payment_terms</code> están completos en todos los clientes?</li>
+</ul>
+
+<h3>Bloque D — Ventas</h3>
+<ul class="checklist">
+  <li class="crit">¿Usan <code>sale.order</code> (proceso completo) o solo <code>account.move</code> (facturación directa)?</li>
+  <li>¿Vendedor se registra en <code>sale.order.user_id</code>, <code>account.move.invoice_user_id</code>, o custom field?</li>
+  <li class="crit">¿Existen metas por vendedor en algún lado? (<code>crm.team</code>, spreadsheet aparte, nada)</li>
+</ul>
+
+<h3>Bloque E — Inventario y compras</h3>
+<ul class="checklist">
+  <li>¿Cuántos <code>stock.warehouse</code>? ¿Reportamos unificado o separado?</li>
+  <li class="crit">¿Usan <code>stock.warehouse.orderpoint</code> (reordenamiento automático)?</li>
+  <li>Valuación: <code>standard_price</code>, promedio, FIFO?</li>
+  <li>¿Cuentas por pagar tienen alguna clasificación de prioridad? (o lo calculamos nosotros)</li>
+</ul>
+
+<h3>Bloque F — Cash Flow</h3>
+<ul class="checklist">
+  <li class="crit">¿Cómo clasifican hoy movimientos en Operativo / Inversión / Financiamiento?
+    (reporte nativo de Enterprise, criterio por cuenta, a mano)</li>
+  <li>¿Todos los cobros/pagos van por <code>account.payment</code> o hay asientos manuales directos?</li>
+</ul>
+
+<h3>Bloque G — Acceso técnico (crítico para el ETL)</h3>
+<ul class="checklist">
+  <li class="crit">¿Pueden crear un usuario técnico read-only con permisos a:
+    <code>account.move</code>, <code>account.move.line</code>, <code>res.partner</code>,
+    <code>product.*</code>, <code>stock.quant</code>, <code>stock.move</code>,
+    <code>account.account</code>, <code>account.analytic.*</code>,
+    <code>account.payment</code>, <code>crm.team</code>, <code>res.users</code>?</li>
+  <li class="crit">URL de Odoo para XML-RPC (<code>https://xxx.odoo.com</code> o IP interna/VPN)</li>
+  <li>¿API keys habilitadas (Odoo 14+) o solo user/password?</li>
+  <li>¿Rate limiting? ¿Cuántas llamadas/min soportan sin bloquearme?</li>
+  <li>Ventana horaria para correr sync pesado (nocturno)</li>
+</ul>
+
+<h3>Bloque H — Volumetría y datos</h3>
+<ul class="checklist">
+  <li>¿Cuántos años de histórico tienen?</li>
+  <li>Facturas/día aproximadas (para estimar carga del ETL)</li>
+  <li>¿Hay data en Excel u otro ERP que <strong>no</strong> está en Odoo y que deberíamos ingestar?</li>
+</ul>
+
+<div class="tip">
+  <strong>Tip: pedir 3 CSVs de muestra.</strong> Antes de cerrar la reunión, pedirle que exporte
+  <strong>10 filas de cada uno</strong>:
+  <ol>
+    <li><code>account.move</code> — últimos 30 días, filtrado a facturas de venta (<code>move_type='out_invoice'</code>)</li>
+    <li><code>res.partner</code> — 10 clientes activos (<code>customer_rank &gt; 0</code>)</li>
+    <li><code>stock.quant</code> — 10 productos con stock en locaciones internas</li>
+  </ol>
+  Con esos CSVs se valida el mapping antes de escribir una sola línea de ETL. Si aparecen campos
+  faltantes, ahorra 1-2 semanas de rework.
+</div>
+
+<div class="warning">
+  <strong>Bandera roja:</strong> Si el ingeniero dice <em>"no usan contabilidad analítica"</em>,
+  el módulo de centros de costo del dashboard se queda sin fuente de datos.
+  Soluciones posibles: (a) activar analítica ahora y backfillear, (b) mapear por cuenta de gasto,
+  (c) sacar los centros de costo del dashboard. Decidir en la reunión.
+</div>
+
+<h2 class="page-break">4. Los 6 gaps del audit traducidos a decisiones</h2>
+<p>
+  Estas son las decisiones concretas que deben quedar cerradas en la reunión o poco después.
+  Cada gap tiene 2-3 opciones viables; la columna <em>Recomendación</em> es lo que yo sugiero
+  basado en tamaño de la empresa y esfuerzo de implementación.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:85pt;">Gap</th>
+      <th>Pregunta concreta y opciones</th>
+      <th style="width:90pt;">Recomendación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1. Product line / brand</strong><br><span class="small">(Ventas – Pareto, rankings)</span></td>
+      <td>
+        ¿Cómo clasifican productos por línea y marca?
+        <ul class="gap-options">
+          <li><strong>A.</strong> <code>product.tag</code> en Odoo 17+ (dos tags: línea + marca)</li>
+          <li><strong>B.</strong> Custom fields <code>x_product_line</code>, <code>x_brand</code> en <code>product.template</code></li>
+          <li><strong>C.</strong> Sacar esos breakdowns del dashboard</li>
+        </ul>
+      </td>
+      <td class="rec">Opción A si están en v17+; sino Opción B con un par de campos</td>
+    </tr>
+    <tr>
+      <td><strong>2. Seller targets</strong><br><span class="small">(Ventas – ranking de vendedores)</span></td>
+      <td>
+        ¿Existen metas mensuales por vendedor? <code>crm.team.invoiced_target</code> es por equipo, no por persona.
+        <ul class="gap-options">
+          <li><strong>A.</strong> Tabla local editable desde nuestra UI (como hicimos con Presupuesto)</li>
+          <li><strong>B.</strong> Custom field <code>x_target_monthly</code> en <code>res.users</code></li>
+          <li><strong>C.</strong> Solo tracking por equipo — pierde ranking individual</li>
+        </ul>
+      </td>
+      <td class="rec">Opción A — simple, desacopla del ciclo de release de Odoo</td>
+    </tr>
+    <tr>
+      <td><strong>3. Payables priority</strong><br><span class="small">(CxP – plan de pagos)</span></td>
+      <td>
+        La columna <code>priority</code> (critical / high / normal / low) no existe nativa.
+        <ul class="gap-options">
+          <li><strong>A.</strong> Reglas automáticas: critical si <code>days_overdue &gt; 30 AND amount &gt; X</code>, etc.</li>
+          <li><strong>B.</strong> Custom field <code>x_priority</code> en <code>account.move</code></li>
+          <li><strong>C.</strong> Combinación A + override manual local para casos especiales</li>
+        </ul>
+      </td>
+      <td class="rec">Opción C — reglas automáticas + override manual</td>
+    </tr>
+    <tr>
+      <td><strong>4. Expense category</strong><br><span class="small">(Gastos – fijos/variables)</span></td>
+      <td>
+        Clasificación <code>fixed / variable / semi-variable</code>.
+        <ul class="gap-options">
+          <li><strong>A.</strong> Mapping por cuenta contable en config (<code>5100 → variable</code>, <code>6200 → fixed</code>)</li>
+          <li><strong>B.</strong> Custom field <code>x_expense_category</code> en <code>account.account</code></li>
+          <li><strong>C.</strong> Heurística por estabilidad (variación mes-a-mes &lt; 5% → fixed)</li>
+        </ul>
+      </td>
+      <td class="rec">Opción A — se hace una vez, sobrevive cambios en Odoo</td>
+    </tr>
+    <tr>
+      <td><strong>5. Cost centers</strong><br><span class="small">(Gastos – por centro de costo)</span></td>
+      <td>
+        Depende 100% de contabilidad analítica en Odoo (<code>account.analytic.account</code>).
+        <ul class="gap-options">
+          <li><strong>A.</strong> Activar analítica en Odoo y asignar <code>analytic_distribution</code> en todos los asientos</li>
+          <li><strong>B.</strong> Dejar el módulo vacío hasta que la activen</li>
+          <li><strong>C.</strong> Mapeo por cuenta contable hacia un centro de costo (menos granular)</li>
+        </ul>
+      </td>
+      <td class="rec">Opción A es la única profesional — empujar para activarla</td>
+    </tr>
+    <tr>
+      <td><strong>6. Cashflow classification</strong><br><span class="small">(Flujo – op/inv/fin)</span></td>
+      <td>
+        La clasificación Operativo / Inversión / Financiamiento no es automática.
+        <ul class="gap-options">
+          <li><strong>A.</strong> Reporte nativo <code>account.cash.flow.report</code> (solo Enterprise)</li>
+          <li><strong>B.</strong> Mapping por rango de código de cuenta (5xxx, 6xxx = operativo; 1200-1299 = inversión)</li>
+          <li><strong>C.</strong> Custom field <code>x_cashflow_category</code> en <code>account.account</code></li>
+        </ul>
+      </td>
+      <td class="rec">Opción B — rápido y no depende de Enterprise</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>Resumen de lo que tiene que salir de la reunión:</strong> versión de Odoo confirmada,
+  decisión sí/no sobre contabilidad analítica, credenciales de un user read-only,
+  URL del XML-RPC, y las 6 decisiones de la tabla de arriba. Todo eso cabe en una hoja A4 de notas.
+</div>
+
+<h2 class="page-break">5. Tips y comentarios finales</h2>
+
+<h3>Para la reunión con el ingeniero</h3>
+<div class="tip">
+  <strong>Postura recomendada:</strong> tratá la reunión como un <em>discovery técnico</em>,
+  no como un pedido. El ingeniero está viendo esto por primera vez y puede decir "no" por
+  defecto a cosas como activar contabilidad analítica. Mostrale el dashboard corriendo
+  (Streamlit en <code>:8501</code>) para que entienda el valor de activar esas piezas.
+</div>
+
+<ul>
+  <li><strong>No comprometerse con deadlines de ETL</strong> hasta tener respuestas en mano.</li>
+  <li><strong>Grabá la reunión</strong> (con permiso) — vas a agradecer poder volver a los detalles técnicos.</li>
+  <li>Si el ingeniero ofrece crear <strong>custom fields</strong>, aceptá solo si están
+    versionados en un módulo custom (no directamente vía UI) — si no, se pierden en upgrades.</li>
+  <li>Pedí la lista de usuarios/equipos de ventas para poder mapear <code>seller_id</code>
+    correctamente desde el día uno.</li>
+</ul>
+
+<h3>Para la ejecución del roadmap</h3>
+<ul>
+  <li><strong>No skipear Fase 1.</strong> Es tentador ir directo al frontend, pero sin API
+    completa vas a estar parchando endpoints mientras migrás páginas.</li>
+  <li><strong>Migrar páginas en orden de valor</strong>, no alfabético:
+    Home → Ventas → CxC → Flujo de Caja → Financiero → Gastos → CxP → Inventarios → Presupuesto → Chat IA.
+    Las primeras 4 son las que el CEO abre todos los días.</li>
+  <li><strong>Deploy temprano, deploy seguido.</strong> Desde Fase 2 en adelante, cada merge a main
+    debería triggerear un deploy a staging automático. Feedback real &gt; review en local.</li>
+  <li><strong>Mantener Streamlit vivo</strong> hasta que la última página esté en Next.js.
+    El equipo de negocio puede seguir usando la vieja mientras migramos.</li>
+</ul>
+
+<h3>Para el posicionamiento como producto</h3>
+<div class="tip">
+  <strong>Desde Fase 5 (producción),</strong> este proyecto deja de ser "dashboard interno" y empieza
+  a ser portfolio piece de AI Solutions Builder. Sugerencias:
+  <ul>
+    <li>Grabá un walkthrough en video de 3-5 min para mostrar a clientes.</li>
+    <li>Escribí un case study (Medium / LinkedIn) explicando la arquitectura: Streamlit MVP →
+      FastAPI + Next.js producción → ETL Odoo. Ese es el arco narrativo que vende.</li>
+    <li>Extraé las partes genéricas (motor de análisis IA, engine de cache, forecaster) como
+      un "boilerplate" reusable para futuros clientes.</li>
+  </ul>
+</div>
+
+<h3>Riesgos y contingencias</h3>
+<table>
+  <thead>
+    <tr><th>Riesgo</th><th>Impacto</th><th>Mitigación</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Odoo en v14 o menor (sin product.tag, sin API keys)</td>
+      <td>Alto</td>
+      <td>Fallback a custom fields en product.template y user/password auth</td>
+    </tr>
+    <tr>
+      <td>Sin contabilidad analítica y cliente no quiere activarla</td>
+      <td>Alto</td>
+      <td>Eliminar vista por centro de costo o derivarla por cuenta contable</td>
+    </tr>
+    <tr>
+      <td>Volumetría mayor a la esperada (&gt;10k facturas/día)</td>
+      <td>Medio</td>
+      <td>Delta sync desde el día 1, nunca full refresh de account.move</td>
+    </tr>
+    <tr>
+      <td>XML-RPC lento o con rate limit agresivo</td>
+      <td>Medio</td>
+      <td>Usar <code>search_read</code> con <code>limit</code> + paginación + queue con retry exponencial</td>
+    </tr>
+    <tr>
+      <td>Cliente cambia de requerimientos durante migración</td>
+      <td>Medio</td>
+      <td>Streamlit sigue vivo — cambios urgentes van ahí hasta Fase 3 completa</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Próximos 7 días sugeridos</h3>
+<ol>
+  <li><strong>Mañana:</strong> reunión con ingeniero de Odoo siguiendo este checklist.</li>
+  <li><strong>Día 1 post-reunión:</strong> consolidar respuestas en un doc, actualizar el mapping
+    <code>docs/odoo_models.md</code>, pedir los 3 CSVs de muestra.</li>
+  <li><strong>Días 2-4:</strong> arrancar Fase 1 — empezar por el módulo de mayor valor
+    (sugerencia: Ventas).</li>
+  <li><strong>Días 5-7:</strong> completar 2-3 módulos de API, correr suite de tests, deploy backend
+    a staging (Fly.io free tier).</li>
+</ol>
+
+<p class="small" style="margin-top: 20pt; text-align: center; color: #94a3b8;">
+  — Fin del documento —
+</p>
+
+</body>
+</html>
