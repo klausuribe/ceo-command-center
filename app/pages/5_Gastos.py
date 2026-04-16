@@ -6,11 +6,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Gastos — CEO Command Center", page_icon="💸", layout="wide")
+st.set_page_config(page_title="Gastos — CEO Command Center", page_icon=":money_with_wings:", layout="wide")
 
+from app.components.theme import apply_theme
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
+from app.components.page_header import page_header, section_title
 
+apply_theme()
 require_auth()
 from app.components.kpi_cards import kpi_row, format_currency, format_pct
 from app.components.charts import line_chart, bar_chart, pie_chart, gauge_chart
@@ -25,20 +28,26 @@ filters = render_sidebar()
 period = filters["period"]
 date_prefix = filters["date_prefix"]
 
-st.title("💸 Gastos")
+page_header("Gastos", "expenses",
+            subtitle=f"Real vs presupuesto, centros de costo y variaciones · {date_prefix}")
 
 try:
     kpis = expense_kpis(date_prefix)
 
     kpi_row([
-        {"label": "Gastos del Mes", "value": format_currency(kpis["total_expenses"])},
-        {"label": "Presupuesto", "value": format_currency(kpis["total_budget"])},
+        {"label": "Gastos del Mes", "value": format_currency(kpis["total_expenses"]),
+         "icon": "expenses"},
+        {"label": "Presupuesto", "value": format_currency(kpis["total_budget"]),
+         "icon": "briefcase"},
         {"label": "Variación", "value": format_currency(kpis["total_variance"]),
          "delta": f"{kpis['variance_pct']:+.1f}%",
-         "help": "Diferencia entre gasto real y presupuestado. Positivo = sobre presupuesto"},
+         "delta_color": "inverse",
+         "help": "Diferencia entre gasto real y presupuestado. Positivo = sobre presupuesto",
+         "icon": "trend-up"},
         {"label": "Ejecución", "value": format_pct(
             kpis["total_expenses"] / kpis["total_budget"] * 100 if kpis["total_budget"] else 0),
-         "help": "% del presupuesto mensual consumido. Ideal: 90-100%"},
+         "help": "% del presupuesto mensual consumido. Ideal: 90-100%",
+         "icon": "chart-pie"},
     ])
 
     st.divider()
@@ -64,7 +73,7 @@ try:
     with col3:
         cc = ea.by_cost_center(date_prefix)
         if not cc.empty:
-            st.subheader("Centro de Costo — Semáforo")
+            section_title("Centro de Costo — Semáforo", "filter")
             data_table(cc, currency_cols=["actual", "budget", "variance"],
                        pct_cols=["variance_pct"])
 
@@ -77,7 +86,7 @@ try:
     st.divider()
 
     # By account detail
-    st.subheader("📋 Detalle por Cuenta")
+    section_title("Detalle por Cuenta", "briefcase")
     by_acc = ea.by_account(date_prefix)
     if not by_acc.empty:
         data_table(by_acc, currency_cols=["actual", "budget", "variance"],
@@ -86,12 +95,12 @@ try:
     # Anomalies
     anomalies = ea.anomalies(date_prefix)
     if not anomalies.empty:
-        st.subheader("⚠️ Gastos Inusuales")
+        section_title("Gastos Inusuales", "alert")
         data_table(anomalies[["account", "amount", "hist_mean", "z_score"]],
                    currency_cols=["amount", "hist_mean"])
 
     # YTD consumption
-    st.subheader("📊 Consumo Presupuestal YTD")
+    section_title("Consumo Presupuestal YTD", "chart-pie")
     ytd = ea.ytd_budget_consumption()
     if not ytd.empty:
         bar_chart(ytd, x="account", y="consumption_pct",

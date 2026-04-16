@@ -10,7 +10,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Importar Datos — CEO Command Center",
-    page_icon="📥",
+    page_icon=":inbox_tray:",
     layout="wide",
 )
 
@@ -18,8 +18,10 @@ from datetime import datetime
 
 import pandas as pd
 
+from app.components.theme import apply_theme
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
+from app.components.page_header import page_header, section_title
 from database.db_manager import table_count
 from etl.file_importer import (
     TABLE_REGISTRY,
@@ -37,10 +39,12 @@ from etl.file_importer import (
     validate_mapping,
 )
 
+apply_theme()
 require_auth()
 render_sidebar()
 
-st.title("📥 Importar Datos")
+page_header("Importar Datos", "import",
+            subtitle="Cargá Excel/CSV con mapeo automático y validaciones")
 
 tab_import, tab_history = st.tabs(["Importar", "Historial de importaciones"])
 
@@ -48,7 +52,7 @@ tab_import, tab_history = st.tabs(["Importar", "Historial de importaciones"])
 
 with tab_import:
     # Step 0: Table selection + file upload
-    st.subheader("1. Seleccionar tabla destino")
+    section_title("1. Seleccionar tabla destino", "filter")
 
     table_options = get_table_options()
     table_labels = [opt["label"] for opt in table_options]
@@ -102,7 +106,7 @@ with tab_import:
     st.divider()
 
     # File upload
-    st.subheader("2. Subir archivo")
+    section_title("2. Subir archivo", "import")
     uploaded = st.file_uploader(
         "Seleccionar archivo Excel (.xlsx) o CSV (.csv)",
         type=["xlsx", "csv"],
@@ -125,7 +129,7 @@ with tab_import:
         st.divider()
 
         # Step 1: Column mapping
-        st.subheader("3. Mapeo de columnas")
+        section_title("3. Mapeo de columnas", "refresh")
         st.caption("Asigne cada columna del archivo a la columna destino. Las columnas requeridas tienen asterisco (*).")
 
         initial_mapping = auto_map_columns(list(raw_df.columns), target_table)
@@ -163,7 +167,7 @@ with tab_import:
         st.divider()
 
         # Step 2: Validate
-        st.subheader("4. Validar y confirmar")
+        section_title("4. Validar y confirmar", "check")
 
         # Mapping validation
         map_result = validate_mapping(raw_df, mapping, target_table)
@@ -245,7 +249,7 @@ with tab_import:
 # ─── History tab ────────────────────────────────────────────────────
 
 with tab_history:
-    st.subheader("Historial de importaciones")
+    section_title("Historial de importaciones", "calendar")
 
     history = get_import_history(limit=100)
     if history.empty:

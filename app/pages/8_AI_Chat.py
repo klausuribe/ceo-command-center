@@ -6,11 +6,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Chat IA — CEO Command Center", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="Chat IA — CEO Command Center", page_icon=":robot_face:", layout="wide")
 
+from app.components.theme import apply_theme
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
+from app.components.page_header import page_header, section_title
 
+apply_theme()
 require_auth()
 from app.components.whatif_panel import whatif_sliders, display_results
 from app.components.ai_analysis_box import ai_analysis_box
@@ -23,12 +26,13 @@ filters = render_sidebar()
 period = filters["period"]
 date_prefix = filters["date_prefix"]
 
-st.title("🤖 Chat IA & Simulador")
+page_header("Chat IA & Simulador", "ai",
+            subtitle="Conversá con tu negocio y simulá escenarios What-If")
 
 engine = get_engine()
 
 if not engine.is_available:
-    st.warning("⚠️ API de Claude no configurada. Agrega ANTHROPIC_API_KEY en .env")
+    st.warning("API de Claude no configurada. Agregá ANTHROPIC_API_KEY en .env")
     st.stop()
 
 # Initialize session state
@@ -38,7 +42,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # ── Three tabs: Chat, What-If, Supuestos ─────────────────────────────
-tab_chat, tab_whatif, tab_assumptions = st.tabs(["💬 Chat", "🔮 What-If", "📋 Supuestos"])
+tab_chat, tab_whatif, tab_assumptions = st.tabs(["Chat", "What-If", "Supuestos"])
 
 # ═══════════════════════════════════════════════════════════════════
 #  TAB 1: CHAT
@@ -112,7 +116,7 @@ with tab_chat:
 
     # Clear chat button
     if st.session_state.messages:
-        if st.button("🗑️ Limpiar conversación", key="clear_chat"):
+        if st.button("Limpiar conversación", key="clear_chat"):
             st.session_state.messages = []
             st.session_state.chat_engine = ChatEngine(engine)
             st.rerun()
@@ -143,7 +147,7 @@ with tab_whatif:
 
         # Save as assumption
         st.divider()
-        st.subheader("💾 Guardar como Supuesto")
+        section_title("Guardar como Supuesto", "check")
         desc = st.text_input(
             "Descripción del supuesto",
             value=_scenario_description(scenario),
@@ -189,12 +193,11 @@ with tab_assumptions:
         inactive = assumptions[assumptions["is_active"] != 1]
 
         if not active.empty:
-            st.subheader(f"✅ Activos ({len(active)})")
+            section_title(f"Activos ({len(active)})", "check")
             for _, row in active.iterrows():
                 col1, col2 = st.columns([5, 1])
                 with col1:
-                    icon = "📈" if row["impact_type"] == "increase" else "📉" if row["impact_type"] == "decrease" else "📋"
-                    st.markdown(f"{icon} **{row['description']}**")
+                    st.markdown(f"**{row['description']}**")
                     st.caption(f"Módulo: {row['module']} | Creado: {row['created_at']} | Por: {row['created_by']}")
                 with col2:
                     if st.button("Desactivar", key=f"deact_{row['assumption_id']}"):
@@ -221,7 +224,7 @@ with tab_assumptions:
 
     # Manual assumption input
     st.divider()
-    st.subheader("➕ Nuevo Supuesto Manual")
+    section_title("Nuevo Supuesto Manual", "sparkles")
     with st.form("new_assumption"):
         module = st.selectbox("Módulo", ["general", "sales", "receivables", "payables",
                                           "inventory", "expenses", "cashflow"])

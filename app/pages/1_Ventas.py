@@ -6,11 +6,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Ventas — CEO Command Center", page_icon="💰", layout="wide")
+st.set_page_config(page_title="Ventas — CEO Command Center", page_icon=":moneybag:", layout="wide")
 
+from app.components.theme import apply_theme
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
+from app.components.page_header import page_header, section_title
 
+apply_theme()
 require_auth()
 from app.components.kpi_cards import kpi_row, format_currency, format_pct
 from app.components.charts import line_chart, bar_chart, pie_chart, scatter_chart, treemap_chart
@@ -25,7 +28,8 @@ filters = render_sidebar()
 period = filters["period"]
 date_prefix = filters["date_prefix"]
 
-st.title("💰 Ventas")
+page_header("Ventas", "sales",
+            subtitle=f"Revenue, márgenes, clientes y desempeño comercial · {date_prefix}")
 
 try:
     kpis = sales_kpis(date_prefix)
@@ -33,12 +37,16 @@ try:
     kpi_row([
         {"label": "Revenue", "value": format_currency(kpis["revenue"]),
          "delta": f"{kpis['mom_change_pct']:+.1f}% MoM",
-         "help": "Ventas totales facturadas en el período seleccionado"},
+         "help": "Ventas totales facturadas en el período seleccionado",
+         "icon": "sales"},
         {"label": "Margen Bruto", "value": format_pct(kpis["avg_margin"] * 100),
-         "help": "Promedio de (precio - costo) / precio por línea de factura"},
-        {"label": "Facturas", "value": f"{int(kpis['n_invoices']):,}"},
+         "help": "Promedio de (precio - costo) / precio por línea de factura",
+         "icon": "chart-pie"},
+        {"label": "Facturas", "value": f"{int(kpis['n_invoices']):,}",
+         "icon": "briefcase"},
         {"label": "Clientes Activos", "value": f"{int(kpis['n_customers'])}",
-         "help": "Clientes con al menos una factura en el período"},
+         "help": "Clientes con al menos una factura en el período",
+         "icon": "user"},
     ])
 
     st.divider()
@@ -87,7 +95,7 @@ try:
     st.divider()
 
     # Seller performance
-    st.subheader("👥 Desempeño Vendedores")
+    section_title("Desempeño Vendedores", "user")
     sellers = sa.seller_performance(date_prefix)
     if not sellers.empty:
         sellers["cumplimiento"] = (sellers["revenue"] / sellers["target_monthly"].replace(0, 1) * 100).round(1)

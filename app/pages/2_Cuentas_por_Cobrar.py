@@ -6,11 +6,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="CxC — CEO Command Center", page_icon="📥", layout="wide")
+st.set_page_config(page_title="CxC — CEO Command Center", page_icon=":inbox_tray:", layout="wide")
 
+from app.components.theme import apply_theme
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
+from app.components.page_header import page_header, section_title
 
+apply_theme()
 require_auth()
 from app.components.kpi_cards import kpi_row, format_currency, format_pct
 from app.components.charts import bar_chart, stacked_bar, pie_chart
@@ -23,21 +26,26 @@ from ai.prompts.receivables_prompts import RECEIVABLES_ANALYSIS
 
 filters = render_sidebar()
 
-st.title("📥 Cuentas por Cobrar")
+page_header("Cuentas por Cobrar", "receivable",
+            subtitle="Aging, DSO, concentración y credit scoring")
 
 try:
     kpis = receivables_kpis()
 
     kpi_row([
         {"label": "Saldo Total CxC", "value": format_currency(kpis["total_balance"]),
-         "help": "Suma de facturas pendientes de cobro (excluye pagadas)"},
+         "help": "Suma de facturas pendientes de cobro (excluye pagadas)",
+         "icon": "receivable"},
         {"label": "Vencido", "value": format_currency(kpis["overdue"]),
          "delta_color": "inverse",
-         "help": "Facturas que superaron su fecha de vencimiento"},
+         "help": "Facturas que superaron su fecha de vencimiento",
+         "icon": "alert-circle"},
         {"label": "DSO", "value": f"{kpis['dso']:.0f} días",
-         "help": "Days Sales Outstanding — días promedio para cobrar. Ideal: <45 días"},
+         "help": "Days Sales Outstanding — días promedio para cobrar. Ideal: <45 días",
+         "icon": "calendar"},
         {"label": "Concentración Top 5", "value": format_pct(kpis["top5_concentration_pct"]),
-         "help": "% del saldo CxC concentrado en los 5 mayores deudores. >50% = riesgo alto"},
+         "help": "% del saldo CxC concentrado en los 5 mayores deudores. >50% = riesgo alto",
+         "icon": "user"},
     ])
 
     st.divider()
@@ -70,7 +78,7 @@ try:
     st.divider()
 
     # Credit scoring
-    st.subheader("📊 Credit Score")
+    section_title("Credit Score", "chart-pie")
     scores = ra.credit_score()
     if not scores.empty:
         data_table(scores[["name", "segment", "score", "risk_level", "on_time_pct",
@@ -80,7 +88,7 @@ try:
         st.info("No hay suficientes datos para calcular credit scores.")
 
     # Upcoming due
-    st.subheader("📅 Próximos Vencimientos (7 días)")
+    section_title("Próximos Vencimientos (7 días)", "calendar")
     upcoming = ra.upcoming_due(7)
     if not upcoming.empty:
         data_table(upcoming, currency_cols=["balance", "original_amount"])

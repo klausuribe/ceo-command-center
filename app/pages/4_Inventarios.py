@@ -6,11 +6,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Inventarios — CEO Command Center", page_icon="📦", layout="wide")
+st.set_page_config(page_title="Inventarios — CEO Command Center", page_icon=":package:", layout="wide")
 
+from app.components.theme import apply_theme
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
+from app.components.page_header import page_header, section_title
 
+apply_theme()
 require_auth()
 from app.components.kpi_cards import kpi_row, format_currency
 from app.components.charts import bar_chart, pie_chart, scatter_chart
@@ -23,21 +26,26 @@ from ai.prompts.inventory_prompts import INVENTORY_ANALYSIS
 
 filters = render_sidebar()
 
-st.title("📦 Inventarios")
+page_header("Inventarios", "inventory",
+            subtitle="Stock, rotación ABC, reposición y dead stock")
 
 try:
     kpis = inventory_kpis()
 
     kpi_row([
         {"label": "Valor Total", "value": format_currency(kpis["total_value"]),
-         "help": "Valor total del inventario a costo unitario"},
-        {"label": "SKUs Activos", "value": f"{int(kpis['total_skus'])}"},
+         "help": "Valor total del inventario a costo unitario",
+         "icon": "inventory"},
+        {"label": "SKUs Activos", "value": f"{int(kpis['total_skus'])}",
+         "icon": "briefcase"},
         {"label": "Bajo Reorden", "value": f"{int(kpis['below_reorder'])}",
          "delta": "requieren pedido", "delta_color": "inverse",
-         "help": "Productos cuyo stock disponible está por debajo del punto de reorden"},
+         "help": "Productos cuyo stock disponible está por debajo del punto de reorden",
+         "icon": "alert-circle"},
         {"label": "Dead Stock", "value": format_currency(kpis["dead_stock_value"]),
          "delta": f"{int(kpis['dead_stock_count'])} SKUs", "delta_color": "inverse",
-         "help": "Productos sin movimiento de venta — candidatos a liquidación"},
+         "help": "Productos sin movimiento de venta — candidatos a liquidación",
+         "icon": "alert"},
     ])
 
     st.divider()
@@ -73,24 +81,24 @@ try:
 
     col3, col4 = st.columns(2)
     with col3:
-        st.subheader("⚠️ Bajo Punto de Reorden")
+        section_title("Bajo Punto de Reorden", "alert-circle")
         data_table(crits["below_reorder"])
 
     with col4:
-        st.subheader("🗑️ Dead Stock")
+        section_title("Dead Stock", "alert")
         data_table(crits["dead_stock"],
                    currency_cols=["total_value"])
 
     # Overstock
     if not crits["overstock"].empty:
-        st.subheader("📦 Sobre-stock (>90 días)")
+        section_title("Sobre-stock (>90 días)", "inventory")
         data_table(crits["overstock"].head(15),
                    currency_cols=["total_value"])
 
     st.divider()
 
     # Reorder suggestions
-    st.subheader("🛒 Sugerencias de Reposición")
+    section_title("Sugerencias de Reposición", "refresh")
     reorder = ia.reorder_suggestions()
     if not reorder.empty:
         data_table(reorder)

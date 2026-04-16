@@ -6,11 +6,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Flujo de Caja — CEO Command Center", page_icon="🏦", layout="wide")
+st.set_page_config(page_title="Flujo de Caja — CEO Command Center", page_icon=":bank:", layout="wide")
 
+from app.components.theme import apply_theme
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
+from app.components.page_header import page_header, section_title
 
+apply_theme()
 require_auth()
 from app.components.kpi_cards import kpi_row, format_currency
 from app.components.charts import line_chart, bar_chart, waterfall_chart
@@ -25,7 +28,8 @@ filters = render_sidebar()
 period = filters["period"]
 date_prefix = filters["date_prefix"]
 
-st.title("🏦 Flujo de Caja")
+page_header("Flujo de Caja", "cashflow",
+            subtitle="Saldo, runway, proyecciones y patrón estacional")
 
 try:
     kpis = cashflow_kpis()
@@ -33,12 +37,17 @@ try:
 
     kpi_row([
         {"label": "Saldo Actual", "value": format_currency(kpis["current_balance"]),
-         "help": "Último saldo registrado en caja"},
-        {"label": "Ingresos del Mes", "value": format_currency(kpis["month_inflow"])},
-        {"label": "Egresos del Mes", "value": format_currency(kpis["month_outflow"])},
+         "help": "Último saldo registrado en caja",
+         "icon": "coins"},
+        {"label": "Ingresos del Mes", "value": format_currency(kpis["month_inflow"]),
+         "icon": "trend-up"},
+        {"label": "Egresos del Mes", "value": format_currency(kpis["month_outflow"]),
+         "icon": "trend-down"},
         {"label": "Flujo Neto Diario Prom.", "value": format_currency(kpis["avg_daily_net"]),
          "delta": "Runway: ∞" if kpis["runway_days"] is None else f"Runway: {int(kpis['runway_days'])} días",
-         "help": "Promedio diario de ingresos - egresos (últimos 30 días). Runway = días hasta agotar caja al ritmo actual"},
+         "delta_color": "off",
+         "help": "Promedio diario ingresos - egresos (últimos 30 días). Runway = días hasta agotar caja",
+         "icon": "bolt"},
     ])
 
     st.divider()
@@ -77,7 +86,7 @@ try:
     st.divider()
 
     # Projection (3 scenarios)
-    st.subheader("🔮 Proyección a 90 Días")
+    section_title("Proyección a 90 Días", "sparkles")
     proj = ca.projection(90)
     if not proj.empty:
         line_chart(proj, x="date_id",
@@ -86,7 +95,7 @@ try:
                    y_label="Bs")
 
         if breakeven:
-            st.warning(f"⚠️ Al ritmo actual, el efectivo podría agotarse en **{breakeven} días**.")
+            st.warning(f"Al ritmo actual, el efectivo podría agotarse en **{breakeven} días**.")
         else:
             st.success("El flujo de caja se mantiene positivo en el horizonte de proyección.")
 

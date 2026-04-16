@@ -1,4 +1,4 @@
-"""Global sidebar with navigation and filters."""
+"""Global sidebar — grouped navigation, filters, SVG icons."""
 
 import calendar
 from datetime import date
@@ -8,6 +8,31 @@ import streamlit as st
 from config.settings import APP_NAME, COMPANY_NAME
 from database.db_manager import query_scalar
 
+from app.components.icons import icon
+
+
+# Navigation structure (label, path, icon_name), grouped into sections.
+_NAV_GROUPS = [
+    ("General", [
+        ("Resumen Ejecutivo",  "Home.py",                         "home"),
+    ]),
+    ("Operación", [
+        ("Ventas",             "pages/1_Ventas.py",               "sales"),
+        ("Cuentas por Cobrar", "pages/2_Cuentas_por_Cobrar.py",   "receivable"),
+        ("Cuentas por Pagar",  "pages/3_Cuentas_por_Pagar.py",    "payable"),
+        ("Inventarios",        "pages/4_Inventarios.py",          "inventory"),
+        ("Gastos",             "pages/5_Gastos.py",               "expenses"),
+    ]),
+    ("Finanzas", [
+        ("Financiero",         "pages/6_Financiero.py",           "financial"),
+        ("Flujo de Caja",      "pages/7_Flujo_de_Caja.py",        "cashflow"),
+    ]),
+    ("Inteligencia", [
+        ("Chat IA",            "pages/8_AI_Chat.py",              "ai"),
+        ("Importar Datos",     "pages/9_Importar_Datos.py",       "import"),
+    ]),
+]
+
 
 def _latest_period_with_data() -> Optional[str]:
     """Return the most recent period (YYYY-MM) that has data in fact_sales."""
@@ -16,36 +41,39 @@ def _latest_period_with_data() -> Optional[str]:
     )
 
 
+def _render_nav() -> None:
+    """Render the grouped navigation block."""
+    for group_name, items in _NAV_GROUPS:
+        st.markdown(
+            f'<div class="ccc-sidebar-group">{group_name}</div>',
+            unsafe_allow_html=True,
+        )
+        for label, path, icon_name in items:
+            # Streamlit's page_link doesn't support HTML — so we prefix
+            # with a Unicode bullet and rely on page_link icon param.
+            # We pass icon=None (no emoji) and use plain label.
+            st.page_link(path, label=label)
+
+
 def render_sidebar() -> dict:
-    """Render the global sidebar and return selected filters.
-
-    Returns dict with:
-        period: str            — always YYYY-MM (safe for financial queries)
-        date_prefix: str       — YYYY-MM or YYYY-MM-DD (for LIKE queries)
-        comparison_period: str — YYYY-MM
-        day: int | None        — selected day or None for whole month
-    """
+    """Render the global sidebar and return selected filters."""
     with st.sidebar:
-        st.title(f"📊 {APP_NAME}")
-        st.caption(COMPANY_NAME)
-        st.divider()
+        # Brand
+        st.markdown(
+            f'<div class="ccc-sidebar-brand">{icon("bolt", size=20)}'
+            f'<span>{APP_NAME}</span></div>'
+            f'<div class="ccc-sidebar-brand__sub">{COMPANY_NAME}</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
 
-        # Navigation
-        st.markdown("### Navegación")
-        st.page_link("Home.py", label="🏠 Resumen Ejecutivo")
-        st.page_link("pages/1_Ventas.py", label="💰 Ventas")
-        st.page_link("pages/2_Cuentas_por_Cobrar.py", label="📥 Cuentas por Cobrar")
-        st.page_link("pages/3_Cuentas_por_Pagar.py", label="📤 Cuentas por Pagar")
-        st.page_link("pages/4_Inventarios.py", label="📦 Inventarios")
-        st.page_link("pages/5_Gastos.py", label="💸 Gastos")
-        st.page_link("pages/6_Financiero.py", label="📈 Financiero")
-        st.page_link("pages/7_Flujo_de_Caja.py", label="🏦 Flujo de Caja")
-        st.page_link("pages/8_AI_Chat.py", label="🤖 Chat IA")
-        st.page_link("pages/9_Importar_Datos.py", label="📥 Importar Datos")
-        st.divider()
+        _render_nav()
 
-        # ── Period filters ──────────────────────────────────────────
-        st.markdown("### Filtros")
+        st.markdown(
+            '<div class="ccc-sidebar-group" style="margin-top:1.3rem;">Filtros</div>',
+            unsafe_allow_html=True,
+        )
+
         today = date.today()
 
         # Build list of available periods (last 24 months)
@@ -58,38 +86,28 @@ def render_sidebar() -> dict:
                 y -= 1
             periods.append(f"{y}-{m:02d}")
 
-        # Set session_state defaults BEFORE creating widgets.
-        # The key param on each widget reads/writes session_state automatically.
-        # We only set the default once (first visit).
         if "sidebar_period" not in st.session_state:
             latest = _latest_period_with_data()
-            if latest and latest in periods:
-                st.session_state.sidebar_period = latest
-            else:
-                st.session_state.sidebar_period = periods[0]
-
+            st.session_state.sidebar_period = (
+                latest if latest and latest in periods else periods[0]
+            )
         if "sidebar_comparison" not in st.session_state:
             st.session_state.sidebar_comparison = "Mes anterior"
-
         if "sidebar_day" not in st.session_state:
             st.session_state.sidebar_day = "Todo el mes"
 
-        # Month selector — key alone handles persistence, no index param
         period = st.selectbox("Período", periods, key="sidebar_period")
 
-        # Day selector within selected month
         y_sel, m_sel = int(period[:4]), int(period[5:])
         max_day = calendar.monthrange(y_sel, m_sel)[1]
         day_options = ["Todo el mes"] + [str(d) for d in range(1, max_day + 1)]
 
-        # Reset day if it exceeds the new month's range
         if (st.session_state.sidebar_day != "Todo el mes"
                 and st.session_state.sidebar_day not in day_options):
             st.session_state.sidebar_day = "Todo el mes"
 
         day_selection = st.selectbox("Día", day_options, key="sidebar_day")
 
-        # Build date_prefix: YYYY-MM or YYYY-MM-DD
         if day_selection == "Todo el mes":
             date_prefix = period
             day = None
@@ -97,7 +115,6 @@ def render_sidebar() -> dict:
             day = int(day_selection)
             date_prefix = f"{period}-{day:02d}"
 
-        # Comparison period
         comparison = st.selectbox(
             "Comparar con",
             ["Mes anterior", "Mismo mes año pasado"],
@@ -112,14 +129,18 @@ def render_sidebar() -> dict:
         else:
             comp_period = f"{y_sel-1}-{period[5:]}"
 
-        st.divider()
+        st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
 
-        # Cache controls
-        if st.button("🔄 Refrescar datos", use_container_width=True):
+        if st.button("Refrescar datos", use_container_width=True):
             st.cache_data.clear()
             st.rerun()
 
-        st.caption("Powered by Claude AI")
+        st.markdown(
+            '<div style="margin-top:0.75rem;color:var(--ccc-text-subtle);'
+            'font-size:0.72rem;display:flex;align-items:center;gap:0.35rem;">'
+            f'{icon("sparkles", size=12)}<span>Powered by Claude AI</span></div>',
+            unsafe_allow_html=True,
+        )
 
         return {
             "period": period,

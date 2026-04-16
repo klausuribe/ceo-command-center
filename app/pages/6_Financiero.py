@@ -6,11 +6,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Financiero — CEO Command Center", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Financiero — CEO Command Center", page_icon=":chart_with_upwards_trend:", layout="wide")
 
+from app.components.theme import apply_theme
 from app.components.auth import require_auth
 from app.components.sidebar import render_sidebar
+from app.components.page_header import page_header, section_title
 
+apply_theme()
 require_auth()
 from app.components.kpi_cards import kpi_row, format_currency, format_pct
 from app.components.charts import line_chart, bar_chart
@@ -24,26 +27,35 @@ from ai.prompts.financial_prompts import FINANCIAL_ANALYSIS
 filters = render_sidebar()
 period = filters["period"]  # Always YYYY-MM for financial queries
 
-st.title("📈 Estados Financieros")
+page_header("Estados Financieros", "financial",
+            subtitle=f"P&L, balance, ratios, eficiencia · {period}")
 
 try:
     kpis = financial_kpis(period)
 
     # Margins row
     kpi_row([
-        {"label": "Revenue", "value": format_currency(kpis["revenue"])},
-        {"label": "Margen Bruto", "value": format_pct(kpis["gross_margin_pct"])},
-        {"label": "Margen Operativo", "value": format_pct(kpis["operating_margin_pct"])},
-        {"label": "Margen Neto", "value": format_pct(kpis["net_margin_pct"])},
+        {"label": "Revenue", "value": format_currency(kpis["revenue"]),
+         "icon": "sales"},
+        {"label": "Margen Bruto", "value": format_pct(kpis["gross_margin_pct"]),
+         "icon": "chart-pie"},
+        {"label": "Margen Operativo", "value": format_pct(kpis["operating_margin_pct"]),
+         "icon": "chart-pie"},
+        {"label": "Margen Neto", "value": format_pct(kpis["net_margin_pct"]),
+         "icon": "trend-up"},
     ])
 
     # Ratios row
     kpi_row([
         {"label": "Razón Corriente", "value": f"{kpis['current_ratio']:.2f}",
-         "help": "Activo Corriente / Pasivo Corriente"},
-        {"label": "Prueba Ácida", "value": f"{kpis['quick_ratio']:.2f}"},
-        {"label": "ROE", "value": format_pct(kpis["roe"])},
-        {"label": "ROA", "value": format_pct(kpis["roa"])},
+         "help": "Activo Corriente / Pasivo Corriente",
+         "icon": "coins"},
+        {"label": "Prueba Ácida", "value": f"{kpis['quick_ratio']:.2f}",
+         "icon": "bolt"},
+        {"label": "ROE", "value": format_pct(kpis["roe"]),
+         "icon": "trend-up"},
+        {"label": "ROA", "value": format_pct(kpis["roa"]),
+         "icon": "briefcase"},
     ])
 
     st.divider()
@@ -99,14 +111,16 @@ try:
         eff = fa.efficiency_ratios(period)
         kpi_row([
             {"label": "DSO", "value": f"{eff['dso']:.0f} días",
-             "help": "Days Sales Outstanding"},
+             "help": "Days Sales Outstanding", "icon": "receivable"},
             {"label": "DPO", "value": f"{eff['dpo']:.0f} días",
-             "help": "Days Payable Outstanding"},
+             "help": "Days Payable Outstanding", "icon": "payable"},
             {"label": "DIO", "value": f"{eff['dio']:.0f} días",
-             "help": "Days Inventory Outstanding"},
+             "help": "Days Inventory Outstanding", "icon": "inventory"},
             {"label": "CCC", "value": f"{eff['ccc']:.0f} días",
              "delta": eff["interpretation"],
-             "help": "Cash Conversion Cycle = DSO + DIO - DPO"},
+             "delta_color": "off",
+             "help": "Cash Conversion Cycle = DSO + DIO - DPO",
+             "icon": "refresh"},
         ])
 
     st.divider()
