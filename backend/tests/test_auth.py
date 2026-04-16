@@ -67,3 +67,24 @@ def test_refresh_rejects_invalid_token(client):
         json={"refresh_token": "not.a.jwt"},
     )
     assert response.status_code == 401
+
+
+def test_token_endpoint_accepts_form_data(client):
+    """Swagger UI uses the OAuth2 password flow against /api/auth/token."""
+    response = client.post(
+        "/api/auth/token",
+        data={"username": "ceo", "password": "admin123"},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["access_token"]
+    assert body["refresh_token"]
+    assert body["token_type"] == "bearer"
+
+
+def test_token_endpoint_rejects_bad_password(client):
+    response = client.post(
+        "/api/auth/token",
+        data={"username": "ceo", "password": "wrong"},
+    )
+    assert response.status_code == 401

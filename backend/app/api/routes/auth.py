@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 
 from backend.app.core.deps import get_current_user
@@ -25,19 +26,34 @@ from backend.app.schemas.auth import (
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=TokenPair)
-def login(payload: LoginRequest) -> TokenPair:
-    """Authenticate with username + password, return an access/refresh pair."""
-    user = get_user(payload.username)
-    if user is None or not verify_password(payload.password, user.password_hash):
+def _issue_tokens(username: str, password: str) -> TokenPair:
+    user = get_user(username)
+    if user is None or not verify_password(password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     return TokenPair(
         access_token=create_access_token(user.username),
         refresh_token=create_refresh_token(user.username),
     )
+
+
+@router.post("/login", response_model=TokenPair)
+def login(payload: LoginRequest) -> TokenPair:
+    """Authenticate with JSON body. Primary entrypoint for the Next.js client."""
+    return _issue_tokens(payload.username, payload.password)
+
+
+@router.post("/token", response_model=TokenPair, include_in_schema=True)
+def token(form_data: OAuth2PasswordRequestForm = Depends()) -> TokenPair:
+    """OAuth2 password-flow token endpoint (form-encoded).
+
+    Same behavior as /login but accepts application/x-www-form-urlencoded so
+    that the Swagger UI "Authorize" dialog can drive the flow natively.
+    """
+    return _issue_tokens(form_data.username, form_data.password)
 
 
 @router.post("/refresh", response_model=AccessToken)

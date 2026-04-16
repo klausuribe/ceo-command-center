@@ -13,7 +13,9 @@ from backend.app.core.users import User, get_user
 
 def _oauth2_scheme() -> OAuth2PasswordBearer:
     settings = get_settings()
-    return OAuth2PasswordBearer(tokenUrl=f"{settings.api_prefix}/auth/login")
+    # Swagger drives the "Authorize" dialog against this URL. It must accept
+    # form-encoded (application/x-www-form-urlencoded) data per OAuth2 spec.
+    return OAuth2PasswordBearer(tokenUrl=f"{settings.api_prefix}/auth/token")
 
 
 oauth2_scheme = _oauth2_scheme()
