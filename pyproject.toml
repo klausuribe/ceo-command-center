@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ceo-command-center"
+version = "1.0.0"
+description = "AI-powered business intelligence dashboard"
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "Proprietary" }
+authors = [{ name = "Klaus Uribe" }]
+
+# Shared library runtime deps (Streamlit UI + FastAPI backend).
+# Web/UI-specific deps live in their own extras.
+dependencies = [
+  "pandas>=2.0.0",
+  "numpy>=1.24.0",
+  "sqlalchemy>=2.0.0",
+  "anthropic>=0.40.0",
+  "python-dotenv>=1.0.0",
+  "python-dateutil>=2.8.0",
+  "loguru>=0.7.0",
+  "openpyxl>=3.1.0",
+  "apscheduler>=3.10.0",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+streamlit = [
+  "streamlit>=1.38.0",
+  "plotly>=5.18.0",
+  "altair>=5.0.0",
+  "streamlit-authenticator>=0.3.0",
+]
+backend = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.8",
+  "pydantic-settings>=2.5",
+  "python-jose[cryptography]>=3.3",
+  "bcrypt>=4.1",
+  "python-multipart>=0.0.12",
+  "psycopg[binary]>=3.2",
+  "httpx>=0.27",
+]
+dev = [
+  "pytest>=9.0",
+  "pytest-cov>=7.0",
+  "pytest-asyncio>=0.24",
+]
+
+[tool.setuptools]
+# Expose the existing shared modules as top-level packages so both the
+# legacy Streamlit app and the new FastAPI backend can import them
+# cleanly (e.g., `from analytics.kpi_calculator import all_kpis`).
+packages = ["analytics", "ai", "database", "config", "etl"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "backend/tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]

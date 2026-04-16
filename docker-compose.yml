@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ccc-postgres
+    environment:
+      POSTGRES_USER: ccc
+      POSTGRES_PASSWORD: ccc_dev_password
+      POSTGRES_DB: ceo_command_center
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ccc -d ceo_command_center"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: ccc-backend
+    env_file:
+      - .env
+    environment:
+      ENVIRONMENT: development
+      # Backend reads DB_PATH for SQLite today; Postgres wiring arrives in Phase 4.
+      DB_PATH: /app/data/ceo_command_center.db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./backend:/app/backend  # hot-reload friendly during dev
+    command: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+.claude/
+.streamlit/secrets.toml
+node_modules/
+frontend/.next/
+frontend/node_modules/
+*.log
+.env
+.env.*
+!.env.example
+data/*.db
