@@ -248,12 +248,18 @@ CREATE TABLE IF NOT EXISTS config_budgets (
     year            INTEGER NOT NULL,
     month           INTEGER NOT NULL,
     module          TEXT NOT NULL,           -- 'sales'/'expenses'/'cashflow'
+    account_id      INTEGER REFERENCES dim_accounts(account_id),
     category        TEXT,
-    metric          TEXT NOT NULL,           -- 'revenue'/'gross_profit'/'total_expense'
+    metric          TEXT NOT NULL,           -- 'revenue'/'gross_profit'/'total_expense' o nombre de cuenta
     target_value    REAL NOT NULL,
+    source          TEXT DEFAULT 'manual',   -- 'manual'/'projected'/'imported'
     notes           TEXT,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_config_budgets_unique
+    ON config_budgets(year, month, module, account_id);
 
 CREATE TABLE IF NOT EXISTS config_assumptions (
     assumption_id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -263,6 +269,8 @@ CREATE TABLE IF NOT EXISTS config_assumptions (
     impact_type     TEXT,                   -- 'increase'/'decrease'/'replace'
     impact_value    REAL,
     impact_pct      REAL,
+    account_id      INTEGER REFERENCES dim_accounts(account_id),
+    category        TEXT,                    -- texto libre para substring match (ej. 'marketing')
     start_date      DATE,
     end_date        DATE,
     is_active       BOOLEAN DEFAULT 1,
